@@ -8,7 +8,7 @@ from src.authentications.jwt_auth import CustomJWTAuthentication
 from datetime import datetime
 from .serializers import RegisterSerializer, LoginSerializer, LoginResponseSerializer, UserSerializer, RefreshTokenSerializer
 from .models import User
-from .queries import user_exists, user_by_id
+from .queries import user_exists, user_by_id, user_exists_verified
 import uuid
 import sys
 
@@ -38,7 +38,8 @@ def register(request):
                 'username' : validated_payload.get('username'),
                 'email' : encrypted_email,
                 'phone_number' : encrypted_phone_number,
-                'password' : make_password(validated_payload.get('password'))
+                'password' : make_password(validated_payload.get('password')),
+                'is_verified': False,
             }
             User(**insert_payload).save()
         
@@ -59,7 +60,7 @@ def login(request):
     
     validated_payload = payload.validated_data
     try:
-        existed_user = user_exists(validated_payload.get('username'), validated_payload.get('username'), validated_payload.get('username'))
+        existed_user = user_exists_verified(validated_payload.get('username'), validated_payload.get('username'), validated_payload.get('username'))
         if not existed_user:
             return output_response(success=RESPONSE_FAILED, data=None, message=USER_DOES_NOT_EXISTS, error=None, status_code=401)
         if len(existed_user) > 1:
@@ -79,6 +80,12 @@ def login(request):
         })
         if not response_data.is_valid():
             return output_response(success=RESPONSE_FAILED, data=None, message=AUTHENTICATION_FAILED, error=None, status_code=400)
+
+        with transaction.atomic():
+            user_update = user_by_id(user.get('id'))
+            user_update.update(
+                last_login=datetime.now()
+            )
 
         return output_response(success=RESPONSE_SUCCESS, data=response_data.validated_data, message=None, error=None, status_code=200)
     except Exception as e:
@@ -116,6 +123,12 @@ def refresh_token(request):
         })
         if not response_data.is_valid():
             return output_response(success=RESPONSE_FAILED, data=None, message=AUTHENTICATION_FAILED, error=None, status_code=400)
+
+        with transaction.atomic():
+            user_update = user_by_id(user.get('id'))
+            user_update.update(
+                last_login=datetime.now()
+            )
 
         return output_response(success=RESPONSE_SUCCESS, data=response_data.validated_data, message=None, error=None, status_code=200)
     except Exception as e:

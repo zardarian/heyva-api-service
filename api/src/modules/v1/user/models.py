@@ -13,6 +13,8 @@ class User(models.Model):
     email = models.TextField(blank=True, null=True)
     phone_number = models.TextField(blank=True, null=True)
     password = models.TextField()
+    last_login = models.DateTimeField(blank=True, null=True)
+    is_verified = models.BooleanField(blank=True, null=True)
 
     class Meta:
         managed = False
