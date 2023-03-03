@@ -1,0 +1,165 @@
+from django.db import transaction
+from django.contrib.auth.hashers import make_password, check_password
+from rest_framework.decorators import api_view, authentication_classes
+from src.helpers import output_response
+from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJECTS_NOT_FOUND
+from src.authentications.basic_auth import CustomBasicAuthentication
+from src.authentications.jwt_auth import CustomJWTAuthentication
+from datetime import datetime
+from .serializers import CreateDictionarySerializer, ReadByTypeDictionarySerializer, DictionarySerializer, UpdateDictionarySerializer
+from .models import Dictionary
+from .queries import get_active_by_type, dictionary_by_id
+import uuid
+import sys
+
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication])
+def create(request):
+    payload = CreateDictionarySerializer(data=request.data)
+    if not payload.is_valid():
+        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=list(payload.errors.keys()), status_code=400)
+    
+    validated_payload = payload.validated_data
+    try:
+        dictionary_uuid = uuid.uuid4()
+        
+        with transaction.atomic():
+            insert_payload = {
+                'id' : str(dictionary_uuid),
+                'created_at' : datetime.now(),
+                'created_by' : request.user.id,
+                'updated_at' : datetime.now(),
+                'updated_by' : request.user.id,
+                'type' : validated_payload.get('type'),
+                'name' : validated_payload.get('name'),
+                'parent' : validated_payload.get('parent'),
+                'is_active' : True
+            }
+            Dictionary(**insert_payload).save()
+        
+        return output_response(success=RESPONSE_SUCCESS, data={'id': insert_payload.get('id')}, message=None, error=None, status_code=200)
+    except Exception as e:
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        error_message = "{}:{}".format(filename, line_number)
+        return output_response(success=RESPONSE_ERROR, data=None, message=error_message, error=str(e), status_code=500)
+
+@api_view(['GET'])
+@authentication_classes([CustomBasicAuthentication])
+def read_by_type(request):
+    try:
+        payload = ReadByTypeDictionarySerializer(data=request.query_params)
+        if not payload.is_valid():
+            return output_response(success=RESPONSE_FAILED, data=None, message=None, error=list(payload.errors.keys()), status_code=400)
+        
+        validated_payload = payload.validated_data
+        dictionary = get_active_by_type(validated_payload.get('type'), validated_payload.get('search'))
+
+        return output_response(success=RESPONSE_SUCCESS, data=DictionarySerializer(dictionary, many=True).data, message=None, error=None, status_code=200)
+    except Exception as e:
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        error_message = "{}:{}".format(filename, line_number)
+        return output_response(success=RESPONSE_ERROR, data=None, message=error_message, error=str(e), status_code=500)
+
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication])
+def update(request, id):
+    payload = UpdateDictionarySerializer(data=request.data)
+    if not payload.is_valid():
+        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=list(payload.errors.keys()), status_code=400)
+    
+    validated_payload = payload.validated_data
+    try:
+        dictionary = dictionary_by_id(id)
+        if not dictionary:
+            return output_response(success=RESPONSE_FAILED, data=None, message=OBJECTS_NOT_FOUND, error=None, status_code=400)
+        
+        legacy = dictionary.values().first()
+        
+        with transaction.atomic():
+            dictionary.update(
+                updated_at=datetime.now(),
+                updated_by=request.user.id,
+                type=validated_payload.get('type', legacy.get('type')),
+                name=validated_payload.get('name', legacy.get('name')),
+                parent=validated_payload.get('parent', legacy.get('parent')),
+            )
+        
+        return output_response(success=RESPONSE_SUCCESS, data=validated_payload, message=None, error=None, status_code=200)
+    except Exception as e:
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        error_message = "{}:{}".format(filename, line_number)
+        return output_response(success=RESPONSE_ERROR, data=None, message=error_message, error=str(e), status_code=500)
+
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication])
+def delete(request, id):
+    try:
+        dictionary = dictionary_by_id(id)
+        if not dictionary:
+            return output_response(success=RESPONSE_FAILED, data=None, message=OBJECTS_NOT_FOUND, error=None, status_code=400)
+        
+        with transaction.atomic():
+            dictionary.update(
+                deleted_at=datetime.now(),
+                deleted_by=request.user.id
+            )
+        
+        return output_response(success=RESPONSE_SUCCESS, data=None, message=None, error=None, status_code=200)
+    except Exception as e:
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        error_message = "{}:{}".format(filename, line_number)
+        return output_response(success=RESPONSE_ERROR, data=None, message=error_message, error=str(e), status_code=500)
+
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication])
+def activate(request, id):
+    try:
+        dictionary = dictionary_by_id(id)
+        if not dictionary:
+            return output_response(success=RESPONSE_FAILED, data=None, message=OBJECTS_NOT_FOUND, error=None, status_code=400)
+
+        with transaction.atomic():
+            dictionary.update(
+                updated_at=datetime.now(),
+                updated_by=request.user.id,
+                is_active=True,
+            )
+        
+        return output_response(success=RESPONSE_SUCCESS, data=None, message=None, error=None, status_code=200)
+    except Exception as e:
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        error_message = "{}:{}".format(filename, line_number)
+        return output_response(success=RESPONSE_ERROR, data=None, message=error_message, error=str(e), status_code=500)
+
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication])
+def deactivate(request, id):
+    try:
+        dictionary = dictionary_by_id(id)
+        if not dictionary:
+            return output_response(success=RESPONSE_FAILED, data=None, message=OBJECTS_NOT_FOUND, error=None, status_code=400)
+        
+        with transaction.atomic():
+            dictionary.update(
+                updated_at=datetime.now(),
+                updated_by=request.user.id,
+                is_active=False,
+            )
+        
+        return output_response(success=RESPONSE_SUCCESS, data=None, message=None, error=None, status_code=200)
+    except Exception as e:
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        error_message = "{}:{}".format(filename, line_number)
+        return output_response(success=RESPONSE_ERROR, data=None, message=error_message, error=str(e), status_code=500)

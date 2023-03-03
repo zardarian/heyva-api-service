@@ -8,37 +8,27 @@ def user_exists(username, email, phone_number):
     )
 
     if username:
-        return user_exist.filter(
+        user_exist = user_exist.filter(
             username=username,
         )
     if email:
-        return user_exist.filter(
+        user_exist = user_exist.filter(
             email=email,
         )
     if phone_number:
-        return user_exist.filter(
+        user_exist = user_exist.filter(
             phone_number=phone_number,
         )
+        
+    return user_exist
 
 def user_exists_verified(username, email, phone_number):
-    user_exist = User.objects.filter(
+    return User.objects.filter(
+        Q(username=username) | Q(email=email) | Q(phone_number=phone_number),
         is_active=True,
         deleted_at__isnull=True,
         is_verified=True,
     )
-    
-    if username:
-        return user_exist.filter(
-            username=username,
-        )
-    if email:
-        return user_exist.filter(
-            email=email,
-        )
-    if phone_number:
-        return user_exist.filter(
-            phone_number=phone_number,
-        )
 
 def user_by_id(id):
     return User.objects.filter(

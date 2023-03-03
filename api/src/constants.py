@@ -17,3 +17,5 @@ USER_ALREADY_EXISTS = "User Already Exists"
 USER_DOES_NOT_EXISTS = "User Does Not Exists"
 PASSWORD_DOES_NOT_MATCH = "Password Does Not Match"
 AUTHENTICATION_FAILED = "Authentication Failed"
+
+OBJECTS_NOT_FOUND = "Objects Not Found"
