@@ -5,6 +5,11 @@ from src.helpers import output_response, encrypt, decrypt
 from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, USER_ALREADY_EXISTS, USER_DOES_NOT_EXISTS, PASSWORD_DOES_NOT_MATCH, MULTIPLE_ROWS_RETURNED, AUTHENTICATION_FAILED
 from src.authentications.basic_auth import CustomBasicAuthentication
 from src.authentications.jwt_auth import CustomJWTAuthentication
+from src.modules.v1.profile.models import Profile
+from src.modules.v1.pregnancy.models import Pregnancy
+from src.modules.v1.dictionary.queries import dictionary_by_id
+from src.modules.v1.user.queries import user_by_id
+from src.modules.v1.profile.queries import get_latest_profile_id_today, profile_by_code
 from datetime import datetime
 from .serializers import RegisterSerializer, LoginSerializer, LoginResponseSerializer, UserSerializer, RefreshTokenSerializer
 from .models import User
@@ -25,15 +30,28 @@ def register(request):
         if existed_user:
             return output_response(success=RESPONSE_FAILED, data=None, message=USER_ALREADY_EXISTS, error=None, status_code=400)
 
+        today = datetime.today()
         user_uuid = uuid.uuid4()
+        profile_uuid = uuid.uuid4()
+        pregnancy_uuid = uuid.uuid4()
+
+        created_by = validated_payload.get('username', validated_payload.get('email', validated_payload.get('phone_number')))
         encrypted_email = validated_payload.get('email')
         encrypted_phone_number = validated_payload.get('phone_number')
+
+        latest_profile_id = get_latest_profile_id_today()
+        if not latest_profile_id:
+            profile_code = "{}{}".format(str(today.strftime("%Y%m%d")), str(1).zfill(8))
+        else:
+            extract_id = int(latest_profile_id[-8:])
+            next_id = extract_id + 1
+            profile_code = "{}{}".format(str(today.strftime("%Y%m%d")), str(next_id).zfill(8))
         
         with transaction.atomic():
             insert_payload = {
                 'id' : str(user_uuid),
                 'created_at' : datetime.now(),
-                'created_by' : validated_payload.get('username', validated_payload.get('email', validated_payload.get('phone_number'))),
+                'created_by' : created_by,
                 'is_active' : True,
                 'username' : validated_payload.get('username'),
                 'email' : encrypted_email,
@@ -42,6 +60,29 @@ def register(request):
                 'is_verified': False,
             }
             User(**insert_payload).save()
+
+            profile_payload = {
+                'id' : str(profile_uuid),
+                'created_at' : datetime.now(),
+                'created_by' : created_by,
+                'code' : profile_code,
+                'full_name' : validated_payload.get('full_name'),
+                'birth_date' : validated_payload.get('birth_date'),
+                'gender' : dictionary_by_id(validated_payload.get('gender')).first(),
+                'user' : user_by_id(str(user_uuid)).first()
+            }
+            Profile(**profile_payload).save()
+
+            pregnancy_payload = {
+                'id': str(pregnancy_uuid),
+                'created_at' : datetime.now(),
+                'created_by' : created_by,
+                'profile_code' : profile_by_code(profile_code).first(),
+                'status' : dictionary_by_id(validated_payload.get('pregnancy_status')).first(),
+                'estimated_due_date' : validated_payload.get('estimated_due_date'),
+                'child_birth_date' : validated_payload.get('child_birth_date')
+            }
+            Pregnancy(**pregnancy_payload).save()
         
         return output_response(success=RESPONSE_SUCCESS, data={'id': insert_payload.get('id')}, message=None, error=None, status_code=200)
     except Exception as e:

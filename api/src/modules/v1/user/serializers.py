@@ -13,6 +13,13 @@ class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False)
     phone_number = serializers.CharField(required=False, max_length=15)
     password = serializers.CharField(required=True)
+    full_name = serializers.CharField(required=True)
+    gender = serializers.CharField(required=False)
+    birth_date = serializers.DateField(required=False)
+    pregnancy_status = serializers.CharField(required=True)
+    interests = serializers.CharField(required=True)
+    estimated_due_date = serializers.DateField(required=False)
+    child_birth_date = serializers.DateField(required=False)
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
