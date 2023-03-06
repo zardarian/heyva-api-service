@@ -16,7 +16,7 @@ class Profile(models.Model):
     avatar = models.TextField(blank=True, null=True)
     slug_name = models.TextField(blank=True, null=True)
     about_me = models.TextField(blank=True, null=True)
-    user = models.ForeignKey('User', models.DO_NOTHING, blank=True, null=True)
+    user = models.OneToOneField('User', related_name='profile', on_delete=models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         managed = False

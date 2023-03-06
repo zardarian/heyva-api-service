@@ -1,15 +1,11 @@
 from rest_framework import serializers
-from src.modules.v1.user.serializers import UserSerializer
 from src.modules.v1.dictionary.serializers import DictionarySerializer
+from src.modules.v1.user.serializers import UserSerializer
+from .models import Profile
 
-class ProfileSerializer(serializers.Serializer):
-    id = serializers.CharField()
-    code = serializers.CharField()
-    full_name = serializers.CharField()
-    name_alias = serializers.CharField()
-    birth_date = serializers.DateField()
+class ProfileSerializer(serializers.ModelSerializer):
     gender = DictionarySerializer()
-    avatar = serializers.CharField()
-    slug_name = serializers.CharField()
-    about_me = serializers.CharField()
     user = UserSerializer()
+    class Meta:
+        model = Profile
+        fields = ['id', 'code', 'full_name', 'name_alias', 'birth_date', 'gender', 'avatar', 'slug_name', 'about_me', 'user']

@@ -1,10 +1,10 @@
 from rest_framework import serializers
+from .models import Dictionary
 
-class DictionarySerializer(serializers.Serializer):
-    id = serializers.CharField()
-    type = serializers.CharField()
-    name = serializers.CharField()
-    parent = serializers.CharField()
+class DictionarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dictionary
+        fields = ['id', 'type', 'name', 'parent']
 
 class CreateDictionarySerializer(serializers.Serializer):
     type = serializers.CharField(required=True)

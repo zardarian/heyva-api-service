@@ -1,12 +1,10 @@
 from rest_framework import serializers
+from .models import User
 
-class UserSerializer(serializers.Serializer):
-    id = serializers.CharField()
-    username = serializers.CharField()
-    email = serializers.EmailField()
-    phone_number = serializers.CharField()
-    is_verified = serializers.BooleanField()
-    last_login = serializers.DateTimeField()
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'phone_number', 'is_verified', 'last_login', 'profile']
 
 class RegisterSerializer(serializers.Serializer):
     username = serializers.CharField(required=False)
