@@ -13,3 +13,8 @@ def profile_by_code(code):
         code=code,
         deleted_at__isnull=True,
     )
+
+def profile_by_user_id(id):
+    return Profile.objects.filter(
+        user=id
+    )

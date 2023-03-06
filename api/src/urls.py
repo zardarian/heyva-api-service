@@ -4,6 +4,7 @@ from src import views
 # modules
 from src.modules.v1.user import controllers as user_controller
 from src.modules.v1.dictionary import controllers as dictionary_controller
+from src.modules.v1.profile import controllers as profile_controller
 
 api = 'api'
 version = 'v1'
@@ -24,4 +25,7 @@ urlpatterns = [
     path("{}/{}/dictionary/activate/<id>".format(api, version), dictionary_controller.activate),
     path("{}/{}/dictionary/deactivate/<id>".format(api, version), dictionary_controller.deactivate),
     path("{}/{}/dictionary/get-by-type".format(api, version), dictionary_controller.read_by_type),
+
+    # Profile
+    path("{}/{}/profile".format(api, version), profile_controller.get_profile),
 ]

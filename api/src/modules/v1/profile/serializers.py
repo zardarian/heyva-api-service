@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from src.modules.v1.user.serializers import UserSerializer
+from src.modules.v1.dictionary.serializers import DictionarySerializer
 
 class ProfileSerializer(serializers.Serializer):
     id = serializers.CharField()
@@ -6,7 +8,8 @@ class ProfileSerializer(serializers.Serializer):
     full_name = serializers.CharField()
     name_alias = serializers.CharField()
     birth_date = serializers.DateField()
-    gender = serializers.CharField()
+    gender = DictionarySerializer()
     avatar = serializers.CharField()
     slug_name = serializers.CharField()
     about_me = serializers.CharField()
+    user = UserSerializer()
