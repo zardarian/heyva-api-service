@@ -2,11 +2,13 @@ from django.db import transaction
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.decorators import api_view, authentication_classes
 from src.helpers import output_response, encrypt, decrypt
-from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, USER_ALREADY_EXISTS, USER_DOES_NOT_EXISTS, PASSWORD_DOES_NOT_MATCH, MULTIPLE_ROWS_RETURNED, AUTHENTICATION_FAILED
+from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, USER_ALREADY_EXISTS, USER_DOES_NOT_EXISTS, PASSWORD_DOES_NOT_MATCH, MULTIPLE_ROWS_RETURNED, AUTHENTICATION_FAILED, GENDER_FEMALE, ROLE_USER
 from src.authentications.basic_auth import CustomBasicAuthentication
 from src.authentications.jwt_auth import CustomJWTAuthentication
 from src.modules.v1.profile.models import Profile
 from src.modules.v1.pregnancy.models import Pregnancy
+from src.modules.v1.role.models import Role
+from src.modules.v1.interest.models import Interest
 from src.modules.v1.dictionary.queries import dictionary_by_id
 from src.modules.v1.user.queries import user_by_id
 from src.modules.v1.profile.queries import get_latest_profile_id_today, profile_by_code
@@ -32,6 +34,7 @@ def register(request):
 
         today = datetime.today()
         user_uuid = uuid.uuid4()
+        role_uuid = uuid.uuid4()
         profile_uuid = uuid.uuid4()
         pregnancy_uuid = uuid.uuid4()
 
@@ -61,6 +64,15 @@ def register(request):
             }
             User(**insert_payload).save()
 
+            role_payload = {
+                'id' : role_uuid,
+                'created_at' : datetime.now(),
+                'created_by' : created_by,
+                'user' : user_by_id(str(user_uuid)).first(),
+                'role' : dictionary_by_id(ROLE_USER).first(),
+            }
+            Role(**role_payload).save()
+
             profile_payload = {
                 'id' : str(profile_uuid),
                 'created_at' : datetime.now(),
@@ -68,8 +80,8 @@ def register(request):
                 'code' : profile_code,
                 'full_name' : validated_payload.get('full_name'),
                 'birth_date' : validated_payload.get('birth_date'),
-                'gender' : dictionary_by_id(validated_payload.get('gender')).first(),
-                'user' : user_by_id(str(user_uuid)).first()
+                'gender' : dictionary_by_id(validated_payload.get('gender', GENDER_FEMALE)).first(),
+                'user' : user_by_id(str(user_uuid)).first(),
             }
             Profile(**profile_payload).save()
 
@@ -80,9 +92,22 @@ def register(request):
                 'profile_code' : profile_by_code(profile_code).first(),
                 'status' : dictionary_by_id(validated_payload.get('pregnancy_status')).first(),
                 'estimated_due_date' : validated_payload.get('estimated_due_date'),
-                'child_birth_date' : validated_payload.get('child_birth_date')
+                'child_birth_date' : validated_payload.get('child_birth_date'),
             }
             Pregnancy(**pregnancy_payload).save()
+
+            interest_payload = []
+            for interest in validated_payload.get('interests'):
+                interest_uuid = uuid.uuid4()
+                payload = Interest(
+                    id=interest_uuid,
+                    created_at=datetime.now(),
+                    created_by=created_by,
+                    profile_code=profile_by_code(profile_code).first(),
+                    interests=dictionary_by_id(interest).first()
+                )
+                interest_payload.append(payload)
+            Interest.objects.bulk_create(interest_payload)
         
         return output_response(success=RESPONSE_SUCCESS, data={'id': insert_payload.get('id')}, message=None, error=None, status_code=200)
     except Exception as e:

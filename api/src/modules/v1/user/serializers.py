@@ -15,7 +15,7 @@ class RegisterSerializer(serializers.Serializer):
     gender = serializers.CharField(required=False)
     birth_date = serializers.DateField(required=False)
     pregnancy_status = serializers.CharField(required=True)
-    interests = serializers.CharField(required=True)
+    interests = serializers.ListField(required=True, child=serializers.CharField(required=True))
     estimated_due_date = serializers.DateField(required=False)
     child_birth_date = serializers.DateField(required=False)
 
