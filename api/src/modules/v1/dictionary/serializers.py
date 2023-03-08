@@ -6,6 +6,11 @@ class DictionarySerializer(serializers.ModelSerializer):
         model = Dictionary
         fields = ['id', 'type', 'name', 'parent']
 
+class DictionaryRelationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dictionary
+        fields = ['id', 'type', 'name', 'parent']
+
 class CreateDictionarySerializer(serializers.Serializer):
     type = serializers.CharField(required=True)
     name = serializers.CharField(required=True)
