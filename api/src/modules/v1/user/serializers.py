@@ -1,10 +1,18 @@
 from rest_framework import serializers
+from src.modules.v1.role.serializers import RoleRelationSerializer
+from src.modules.v1.role.queries import role_by_user_id
 from .models import User
 
 class UserSerializer(serializers.ModelSerializer):
+    roles = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'phone_number', 'is_verified', 'last_login']
+        fields = ['id', 'username', 'email', 'phone_number', 'is_verified', 'last_login', 'roles']
+
+    def get_roles(self, obj):
+        roles = role_by_user_id(obj.id)
+        return RoleRelationSerializer(roles, many=True).data
 
 class RegisterSerializer(serializers.Serializer):
     username = serializers.CharField(required=False)
