@@ -1,5 +1,4 @@
 from django.db import transaction
-from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.decorators import api_view, authentication_classes
 from src.helpers import output_response
 from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJECTS_NOT_FOUND
@@ -8,7 +7,7 @@ from src.authentications.jwt_auth import CustomJWTAuthentication
 from datetime import datetime
 from .serializers import CreateDictionarySerializer, ReadByTypeDictionarySerializer, DictionarySerializer, UpdateDictionarySerializer
 from .models import Dictionary
-from .queries import get_active_by_type, dictionary_by_id
+from .queries import dictionary_active_by_type, dictionary_by_id
 import uuid
 import sys
 
@@ -28,8 +27,6 @@ def create(request):
                 'id' : str(dictionary_uuid),
                 'created_at' : datetime.now(),
                 'created_by' : request.user.id,
-                'updated_at' : datetime.now(),
-                'updated_by' : request.user.id,
                 'type' : validated_payload.get('type'),
                 'name' : validated_payload.get('name'),
                 'parent' : validated_payload.get('parent'),
@@ -54,7 +51,7 @@ def read_by_type(request):
             return output_response(success=RESPONSE_FAILED, data=None, message=None, error=list(payload.errors.keys()), status_code=400)
         
         validated_payload = payload.validated_data
-        dictionary = get_active_by_type(validated_payload.get('type'), validated_payload.get('search'))
+        dictionary = dictionary_active_by_type(validated_payload.get('type'), validated_payload.get('search'))
 
         return output_response(success=RESPONSE_SUCCESS, data=DictionarySerializer(dictionary, many=True).data, message=None, error=None, status_code=200)
     except Exception as e:

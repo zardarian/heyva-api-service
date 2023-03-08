@@ -18,7 +18,7 @@ class CreateDictionarySerializer(serializers.Serializer):
 
 class ReadByTypeDictionarySerializer(serializers.Serializer):
     type = serializers.CharField(required=True)
-    name = serializers.CharField(required=False)
+    search = serializers.CharField(required=False)
 
 class UpdateDictionarySerializer(serializers.Serializer):
     type = serializers.CharField(required=False)

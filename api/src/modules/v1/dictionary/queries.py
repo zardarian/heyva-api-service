@@ -1,9 +1,11 @@
 from django.db.models import Q
 from .models import Dictionary
 
-def get_active_by_type(type, search):
+def dictionary_active_by_type(type, search):
     dictionary = Dictionary.objects.filter(
-        type=type
+        type=type,
+        is_active=True,
+        deleted_at__isnull=True
     )
 
     if search:
@@ -16,6 +18,13 @@ def get_active_by_type(type, search):
 def dictionary_by_id(id):
     return Dictionary.objects.filter(
         id=id,
+        is_active=True,
+        deleted_at__isnull=True,
+    )
+
+def dictionary_active_by_multiple_id(ids):
+    return Dictionary.objects.filter(
+        id__in=ids,
         is_active=True,
         deleted_at__isnull=True,
     )

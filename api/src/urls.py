@@ -5,6 +5,7 @@ from src import views
 from src.modules.v1.user import controllers as user_controller
 from src.modules.v1.dictionary import controllers as dictionary_controller
 from src.modules.v1.profile import controllers as profile_controller
+from src.modules.v1.article import controllers as article_controller
 
 api = 'api'
 version = 'v1'
@@ -28,4 +29,9 @@ urlpatterns = [
 
     # Profile
     path("{}/{}/profile".format(api, version), profile_controller.get_profile),
+
+    # Article
+    path("{}/{}/article/create".format(api, version), article_controller.create),
+    path("{}/{}/article/list".format(api, version), article_controller.read_list),
+    path("{}/{}/article/<id>".format(api, version), article_controller.read_by_id),
 ]
