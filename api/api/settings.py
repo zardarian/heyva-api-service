@@ -146,7 +146,9 @@ ENCRYPT_KEY = bytes(env('ENCRYPT_KEY'), 'utf-8')
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'src.paginations.page_number_pagination.CustomPageNumberPagination',
+    'PAGE_SIZE': 10
 }
 
 BASIC_AUTH_USERNAME=env('BASIC_AUTH_USERNAME')

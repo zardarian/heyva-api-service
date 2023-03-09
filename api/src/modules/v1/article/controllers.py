@@ -1,5 +1,6 @@
 from django.db import transaction
 from rest_framework.decorators import api_view, authentication_classes
+from src.paginations.page_number_pagination import CustomPageNumberPagination
 from src.helpers import output_response
 from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJECTS_NOT_FOUND
 from src.authentications.basic_auth import CustomBasicAuthentication
@@ -65,9 +66,13 @@ def read_list(request):
             return output_response(success=RESPONSE_FAILED, data=None, message=None, error=list(payload.errors.keys()), status_code=400)
         
         validated_payload = payload.validated_data
-        article = article_active(validated_payload.get('search'), validated_payload.get('tag'))
 
-        return output_response(success=RESPONSE_SUCCESS, data=ArticleSerializer(article, many=True).data, message=None, error=None, status_code=200)
+        paginator = CustomPageNumberPagination()
+        article = article_active(validated_payload.get('search'), validated_payload.get('tag'))
+        result_page = paginator.paginate_queryset(article, request)
+        serializer = ArticleSerializer(result_page, many=True)
+
+        return paginator.get_paginated_response(success=RESPONSE_SUCCESS, data=serializer.data, message=None, error=None, status_code=200)
     except Exception as e:
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename

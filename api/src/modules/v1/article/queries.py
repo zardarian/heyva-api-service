@@ -17,7 +17,7 @@ def article_active(search, tag):
             article_tag__tag__in=tag
         )
     
-    return article.distinct('id')
+    return article.distinct('id', 'created_at').order_by('-created_at')
 
 def article_by_id(id):
     return Article.objects.filter(
