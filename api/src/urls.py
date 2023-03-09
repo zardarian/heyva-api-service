@@ -6,6 +6,7 @@ from src.modules.v1.user import controllers as user_controller
 from src.modules.v1.dictionary import controllers as dictionary_controller
 from src.modules.v1.profile import controllers as profile_controller
 from src.modules.v1.article import controllers as article_controller
+from src.modules.v1.article_attachment import controllers as article_attachment_controller
 
 api = 'api'
 version = 'v1'
@@ -34,4 +35,8 @@ urlpatterns = [
     path("{}/{}/article/create".format(api, version), article_controller.create),
     path("{}/{}/article/list".format(api, version), article_controller.read_list),
     path("{}/{}/article/<id>".format(api, version), article_controller.read_by_id),
+
+    # Article Attachment
+    path("{}/{}/article-attachment/create".format(api, version), article_attachment_controller.create),
+    path("{}/{}/article-attachment/get-unused".format(api, version), article_attachment_controller.read_unused),
 ]

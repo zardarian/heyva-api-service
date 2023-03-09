@@ -7,6 +7,7 @@ from src.authentications.basic_auth import CustomBasicAuthentication
 from src.authentications.jwt_auth import CustomJWTAuthentication
 from src.modules.v1.article_tag.models import ArticleTag
 from src.modules.v1.dictionary.queries import dictionary_by_id
+from src.modules.v1.article_attachment.queries import article_attachment_by_multiple_id
 from datetime import datetime
 from .serializers import CreateArticleSerializer, ArticleSerializer, ReadSerializer
 from .models import Article
@@ -48,6 +49,11 @@ def create(request):
                 )
                 tag_payload.append(payload)
             ArticleTag.objects.bulk_create(tag_payload)
+
+            article_attachment = article_attachment_by_multiple_id(validated_payload.get('attachment'))
+            article_attachment.update(
+                article=str(article_uuid)
+            )
         
         return output_response(success=RESPONSE_SUCCESS, data={'id': insert_payload.get('id')}, message=None, error=None, status_code=200)
     except Exception as e:
