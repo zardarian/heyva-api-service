@@ -3,7 +3,7 @@ FROM python:3.10.4
 LABEL Heyva Health <heyva.health@gmail.com>
 
 ENV PYTHONUNBUFFERED 1
-
+ENV TZ=Asia/Jakarta
 
 RUN mkdir /app
 WORKDIR /app
