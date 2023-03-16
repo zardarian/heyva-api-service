@@ -4,6 +4,9 @@ LABEL Heyva Health <heyva.health@gmail.com>
 
 ENV PYTHONUNBUFFERED 1
 
+RUN apt update && apt install tzdata -y
+ENV TZ="Asia/Jakarta"
+
 RUN mkdir /app
 WORKDIR /app
 
