@@ -16,7 +16,7 @@ import sys
 def create(request):
     payload = CreateDictionarySerializer(data=request.data)
     if not payload.is_valid():
-        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=list(payload.errors.keys()), status_code=400)
+        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=payload.errors, status_code=400)
     
     validated_payload = payload.validated_data
     try:
@@ -48,7 +48,7 @@ def read_by_type(request):
     try:
         payload = ReadByTypeDictionarySerializer(data=request.query_params)
         if not payload.is_valid():
-            return output_response(success=RESPONSE_FAILED, data=None, message=None, error=list(payload.errors.keys()), status_code=400)
+            return output_response(success=RESPONSE_FAILED, data=None, message=None, error=payload.errors, status_code=400)
         
         validated_payload = payload.validated_data
         dictionary = dictionary_active_by_type(validated_payload.get('type'), validated_payload.get('search'))
@@ -66,7 +66,7 @@ def read_by_type(request):
 def update(request, id):
     payload = UpdateDictionarySerializer(data=request.data)
     if not payload.is_valid():
-        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=list(payload.errors.keys()), status_code=400)
+        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=payload.errors, status_code=400)
     
     validated_payload = payload.validated_data
     try:

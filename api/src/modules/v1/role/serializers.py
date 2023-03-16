@@ -15,3 +15,6 @@ class RoleRelationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
         fields = ['id', 'role']
+
+class UpdateRoleSerializer(serializers.Serializer):
+    roles = serializers.ListField(required=True, child=serializers.CharField(required=True))

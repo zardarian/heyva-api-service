@@ -4,6 +4,7 @@ from src import views
 # modules
 from src.modules.v1.user import controllers as user_controller
 from src.modules.v1.dictionary import controllers as dictionary_controller
+from src.modules.v1.role import controllers as role_controller
 from src.modules.v1.profile import controllers as profile_controller
 from src.modules.v1.article import controllers as article_controller
 from src.modules.v1.article_attachment import controllers as article_attachment_controller
@@ -28,6 +29,9 @@ urlpatterns = [
     path("{}/{}/dictionary/activate/<id>".format(api, version), dictionary_controller.activate),
     path("{}/{}/dictionary/deactivate/<id>".format(api, version), dictionary_controller.deactivate),
     path("{}/{}/dictionary/get-by-type".format(api, version), dictionary_controller.read_by_type),
+
+    # Role
+    path("{}/{}/role/update/<user_id>".format(api, version), role_controller.update),
 
     # Profile
     path("{}/{}/profile".format(api, version), profile_controller.get_profile),

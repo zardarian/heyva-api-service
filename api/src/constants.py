@@ -20,6 +20,10 @@ PASSWORD_DOES_NOT_MATCH = "Password Does Not Match"
 AUTHENTICATION_FAILED = "Authentication Failed"
 
 OBJECTS_NOT_FOUND = "Objects Not Found"
+SUCCESSFULLY_INSERT = "Successfully Insert"
+FAILED_INSERT = "Failed to Insert"
+SUCCESSFULLY_UPDATE = "Successfully Update"
+FAILED_UPDATE = "Failed to Update"
 
 # Objects
 GENDER_MALE = '84815f1a-0cdb-4686-b312-e38ee1d9b7fb'

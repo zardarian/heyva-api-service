@@ -18,7 +18,7 @@ import sys
 def create(request):
     payload = CreateArticleAttachmentSerializer(data=request.data)
     if not payload.is_valid():
-        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=list(payload.errors.keys()), status_code=400)
+        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=payload.errors, status_code=400)
     
     validated_payload = payload.validated_data
     try:

@@ -29,7 +29,7 @@ import sys
 def register(request):
     payload = RegisterSerializer(data=request.data)
     if not payload.is_valid():
-        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=list(payload.errors.keys()), status_code=400)
+        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=payload.errors, status_code=400)
     
     validated_payload = payload.validated_data
     try:
@@ -185,7 +185,7 @@ def verification(request, id, registration_token):
 def login(request):
     payload = LoginSerializer(data=request.data)
     if not payload.is_valid():
-        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=list(payload.errors.keys()), status_code=400)
+        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=payload.errors, status_code=400)
     
     validated_payload = payload.validated_data
     try:
@@ -229,7 +229,7 @@ def login(request):
 def refresh_token(request):
     payload = RefreshTokenSerializer(data=request.data)
     if not payload.is_valid():
-        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=list(payload.errors.keys()), status_code=400)
+        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=payload.errors, status_code=400)
     
     validated_payload = payload.validated_data
     try:
