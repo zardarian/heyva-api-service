@@ -1,9 +1,9 @@
 from django.http import JsonResponse
 from cryptography.fernet import Fernet
+from django.conf import settings
 import base64
 import logging
 import traceback
-from django.conf import settings
 
 def output_response(success=None, data=None, message=None, error=None, status_code=None):
     output = {
@@ -22,6 +22,9 @@ def output_json(success=None, data=None, message=None, error=None):
         'error': error
     }
     return output
+
+def generate_registration_url(token,  user_id):
+    return "{}/{}/{}/{}/{}/{}/{}".format(settings.BASE_URL, 'api', 'v1', 'users', 'verification', user_id, token)
 
 def encrypt(txt):
     try:

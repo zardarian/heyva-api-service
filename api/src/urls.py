@@ -16,6 +16,7 @@ urlpatterns = [
 
     # User
     path("{}/{}/users/register".format(api, version), user_controller.register),
+    path("{}/{}/users/verification/<id>/<registration_token>".format(api, version), user_controller.verification),
     path("{}/{}/users/login".format(api, version), user_controller.login),
     path("{}/{}/users/refresh-token".format(api, version), user_controller.refresh_token),
     path("{}/{}/users".format(api, version), user_controller.get_user),

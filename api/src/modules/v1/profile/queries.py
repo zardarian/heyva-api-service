@@ -4,7 +4,7 @@ from .models import Profile
 
 def get_latest_profile_id_today():
     return Profile.objects.filter(
-        created_at=datetime.today(),
+        created_at__date=datetime.today(),
         deleted_at__isnull=True,
     ).order_by('-code')
 

@@ -72,9 +72,44 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
         return jwt_token
     
     @classmethod
+    def create_registration_token(cls, user):
+        payload = {
+            'user_identifier': user.get('id'),
+            'exp': int((datetime.now() + timedelta(minutes=settings.JWT_CONFIG['REGISTRATION_TOKEN_LIFETIME'])).timestamp()),
+            'iat': datetime.now().timestamp(),
+            'username': user.get('username'),
+            'email': user.get('email'),
+            'phone_number': user.get('phone_number')
+        }
+
+        jwt_token = jwt.encode(payload, settings.JWT_CONFIG['SIGNING_KEY'], algorithm=settings.JWT_CONFIG['ALGORITHM'])
+
+        return jwt_token
+    
+    @classmethod
     def validate_refresh_token(cls, refresh_token, user_id):
         try:
             payload = jwt.decode(refresh_token, settings.JWT_CONFIG['SIGNING_KEY'], algorithms=[settings.JWT_CONFIG['ALGORITHM']])
+        except jwt.exceptions.InvalidSignatureError:
+            return False, INVALID_SIGNATURE
+        except jwt.exceptions.ExpiredSignatureError:
+            return False, EXPIRED_SIGNATURE
+        except:
+            return False, AUTHORIZATION_PARSE_ERROR
+
+        user_identifier = payload.get('user_identifier')
+        if user_identifier is None:
+            return False, USER_IDENTIFIER_NOT_FOUND_IN_JWT
+
+        if user_identifier != user_id:
+            return False, USER_DOES_NOT_MATCH
+
+        return True, user_id
+    
+    @classmethod
+    def validate_registration_token(cls, registration_token, user_id):
+        try:
+            payload = jwt.decode(registration_token, settings.JWT_CONFIG['SIGNING_KEY'], algorithms=[settings.JWT_CONFIG['ALGORITHM']])
         except jwt.exceptions.InvalidSignatureError:
             return False, INVALID_SIGNATURE
         except jwt.exceptions.ExpiredSignatureError:
