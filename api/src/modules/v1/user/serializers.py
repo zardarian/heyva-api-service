@@ -39,3 +39,12 @@ class LoginResponseSerializer(serializers.Serializer):
     id = serializers.CharField()
     access_token = serializers.CharField()
     refresh_token = serializers.CharField()
+
+class AuthenticateSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    username = serializers.CharField()
+    email = serializers.EmailField()
+    phone_number = serializers.CharField()
+    is_verified = serializers.BooleanField()
+    last_login = serializers.DateTimeField()
+    roles = serializers.ListField(child=serializers.CharField())

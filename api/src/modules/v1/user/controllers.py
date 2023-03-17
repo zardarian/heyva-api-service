@@ -271,7 +271,7 @@ def refresh_token(request):
 @authentication_classes([CustomJWTAuthentication])
 def get_user(request):
     try:
-        user = user_by_id(request.user.id)
+        user = user_by_id(request.user.get('id'))
         if not user:
             return output_response(success=RESPONSE_FAILED, data=None, message=USER_DOES_NOT_EXISTS, error=None, status_code=404)
         

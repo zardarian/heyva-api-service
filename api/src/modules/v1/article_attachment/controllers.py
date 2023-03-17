@@ -32,7 +32,7 @@ def create(request):
                 payload = ArticleAttachment(
                     id=attachment_uuid,
                     created_at=datetime.now(),
-                    created_by=request.user.id,
+                    created_by=request.user.get('id'),
                     article=article_by_id(validated_payload.get('article')).first(),
                     attachment=attachment_path
                 )

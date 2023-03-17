@@ -14,7 +14,7 @@ import sys
 @authentication_classes([CustomJWTAuthentication])
 def get_profile(request):
     try:
-        profile = profile_by_user_id(request.user.id)
+        profile = profile_by_user_id(request.user.get('id'))
         if not profile:
             return output_response(success=RESPONSE_FAILED, data=None, message=USER_DOES_NOT_EXISTS, error=None, status_code=404)
         

@@ -26,7 +26,7 @@ def create(request):
             insert_payload = {
                 'id' : str(dictionary_uuid),
                 'created_at' : datetime.now(),
-                'created_by' : request.user.id,
+                'created_by' : request.user.get('id'),
                 'type' : validated_payload.get('type'),
                 'name' : validated_payload.get('name'),
                 'parent' : validated_payload.get('parent'),
@@ -79,7 +79,7 @@ def update(request, id):
         with transaction.atomic():
             dictionary.update(
                 updated_at=datetime.now(),
-                updated_by=request.user.id,
+                updated_by=request.user.get('id'),
                 type=validated_payload.get('type', legacy.get('type')),
                 name=validated_payload.get('name', legacy.get('name')),
                 parent=validated_payload.get('parent', legacy.get('parent')),
@@ -104,7 +104,7 @@ def delete(request, id):
         with transaction.atomic():
             dictionary.update(
                 deleted_at=datetime.now(),
-                deleted_by=request.user.id
+                deleted_by=request.user.get('id')
             )
         
         return output_response(success=RESPONSE_SUCCESS, data=None, message=None, error=None, status_code=200)
@@ -126,7 +126,7 @@ def activate(request, id):
         with transaction.atomic():
             dictionary.update(
                 updated_at=datetime.now(),
-                updated_by=request.user.id,
+                updated_by=request.user.get('id'),
                 is_active=True,
             )
         
@@ -149,7 +149,7 @@ def deactivate(request, id):
         with transaction.atomic():
             dictionary.update(
                 updated_at=datetime.now(),
-                updated_by=request.user.id,
+                updated_by=request.user.get('id'),
                 is_active=False,
             )
         

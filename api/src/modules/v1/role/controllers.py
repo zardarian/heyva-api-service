@@ -1,9 +1,9 @@
 from django.db import transaction
-from rest_framework.decorators import api_view, authentication_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from src.helpers import output_response
 from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, SUCCESSFULLY_UPDATE, FAILED_UPDATE
-from src.authentications.basic_auth import CustomBasicAuthentication
 from src.authentications.jwt_auth import CustomJWTAuthentication
+from src.permissions.super_admin_permission import IsSuperAdmin
 from src.modules.v1.user.queries import user_by_id
 from src.modules.v1.dictionary.queries import dictionary_by_id
 from datetime import datetime
@@ -15,6 +15,7 @@ import sys
 
 @api_view(['PUT'])
 @authentication_classes([CustomJWTAuthentication])
+@permission_classes([IsSuperAdmin])
 def update(request, user_id):
     payload = UpdateRoleSerializer(data=request.data)
     if not payload.is_valid():
@@ -31,9 +32,9 @@ def update(request, user_id):
                 payload = Role(
                     id = role_uuid,
                     created_at = datetime.now(),
-                    created_by = request.user.id,
+                    created_by = request.user.get('id'),
                     updated_at = datetime.now(),
-                    updated_by = request.user.id,
+                    updated_by = request.user.get('id'),
                     user = user_by_id(user_id).first(),
                     role = dictionary_by_id(role).first()
                 )

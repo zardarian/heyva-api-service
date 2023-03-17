@@ -4,7 +4,7 @@ from rest_framework import authentication, exceptions
 from rest_framework.exceptions import AuthenticationFailed, ParseError
 from src.modules.v1.user.queries import user_by_id
 from src.modules.v1.role.queries import role_by_user_id
-from src.modules.v1.role.serializers import RoleRelationSerializer
+from src.modules.v1.user.serializers import AuthenticateSerializer
 from src.helpers import output_json
 from src.constants import RESPONSE_FAILED, AUTHORIZATION_HEADER_DOES_NOT_EXISTS, INVALID_SIGNATURE, EXPIRED_SIGNATURE, USER_IDENTIFIER_NOT_FOUND_IN_JWT, USER_NOT_FOUND, AUTHORIZATION_PARSE_ERROR, USER_DOES_NOT_MATCH
 import jwt
@@ -37,8 +37,20 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
         if user is None:
             output = output_json(success=RESPONSE_FAILED, data=None, message=USER_NOT_FOUND, error=None)
             raise AuthenticationFailed(output)
-
-        return user, payload
+        
+        serialized_user = AuthenticateSerializer(
+            {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'phone_number': user.phone_number,
+                'is_verified': user.is_verified,
+                'last_login': user.last_login,
+                'roles': payload.get('roles')
+            }
+        )
+        
+        return serialized_user.data, payload
 
     def authenticate_header(self, request):
         return 'Bearer'

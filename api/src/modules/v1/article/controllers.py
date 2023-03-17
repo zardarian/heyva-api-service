@@ -30,7 +30,7 @@ def create(request):
             insert_payload = {
                 'id' : str(article_uuid),
                 'created_at' : datetime.now(),
-                'created_by' : request.user.id,
+                'created_by' : request.user.get('id'),
                 'is_active' : True,
                 'title' : validated_payload.get('title'),
                 'body' : validated_payload.get('body'),
@@ -43,7 +43,7 @@ def create(request):
                 payload = ArticleTag(
                     id=tag_uuid,
                     created_at=datetime.now(),
-                    created_by=request.user.id,
+                    created_by=request.user.get('id'),
                     article=article_by_id(article_uuid).first(),
                     tag=dictionary_by_id(tag).first(),
                 )
