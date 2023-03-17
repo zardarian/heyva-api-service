@@ -2,7 +2,9 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from rest_framework import authentication, exceptions
 from rest_framework.exceptions import AuthenticationFailed, ParseError
-from src.modules.v1.user.models import User
+from src.modules.v1.user.queries import user_by_id
+from src.modules.v1.role.queries import role_by_user_id
+from src.modules.v1.role.serializers import RoleRelationSerializer
 from src.helpers import output_json
 from src.constants import RESPONSE_FAILED, AUTHORIZATION_HEADER_DOES_NOT_EXISTS, INVALID_SIGNATURE, EXPIRED_SIGNATURE, USER_IDENTIFIER_NOT_FOUND_IN_JWT, USER_NOT_FOUND, AUTHORIZATION_PARSE_ERROR, USER_DOES_NOT_MATCH
 import jwt
@@ -31,7 +33,7 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
             output = output_json(success=RESPONSE_FAILED, data=None, message=USER_IDENTIFIER_NOT_FOUND_IN_JWT, error=None)
             raise AuthenticationFailed(output)
 
-        user = User.objects.filter(id=user_identifier).first()
+        user = user_by_id(user_identifier).first()
         if user is None:
             output = output_json(success=RESPONSE_FAILED, data=None, message=USER_NOT_FOUND, error=None)
             raise AuthenticationFailed(output)
@@ -43,13 +45,15 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
     
     @classmethod
     def create_access_token(cls, user):
+        roles = role_by_user_id(user.get('id')).values_list('role', flat=True)
         payload = {
             'user_identifier': user.get('id'),
             'exp': int((datetime.now() + timedelta(hours=settings.JWT_CONFIG['ACCESS_TOKEN_LIFETIME'])).timestamp()),
             'iat': datetime.now().timestamp(),
             'username': user.get('username'),
             'email': user.get('email'),
-            'phone_number': user.get('phone_number')
+            'phone_number': user.get('phone_number'),
+            'roles': list(roles),
         }
 
         jwt_token = jwt.encode(payload, settings.JWT_CONFIG['SIGNING_KEY'], algorithm=settings.JWT_CONFIG['ALGORITHM'])
@@ -58,13 +62,15 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
     
     @classmethod
     def create_refresh_token(cls, user):
+        roles = role_by_user_id(user.get('id')).values_list('role', flat=True)
         payload = {
             'user_identifier': user.get('id'),
             'exp': int((datetime.now() + timedelta(days=settings.JWT_CONFIG['REFRESH_TOKEN_LIFETIME'])).timestamp()),
             'iat': datetime.now().timestamp(),
             'username': user.get('username'),
             'email': user.get('email'),
-            'phone_number': user.get('phone_number')
+            'phone_number': user.get('phone_number'),
+            'roles': list(roles),
         }
 
         jwt_token = jwt.encode(payload, settings.JWT_CONFIG['SIGNING_KEY'], algorithm=settings.JWT_CONFIG['ALGORITHM'])
