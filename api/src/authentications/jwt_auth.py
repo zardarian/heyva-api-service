@@ -4,6 +4,7 @@ from rest_framework import authentication, exceptions
 from rest_framework.exceptions import AuthenticationFailed, ParseError
 from src.modules.v1.user.queries import user_by_id
 from src.modules.v1.role.queries import role_by_user_id
+from src.modules.v1.profile.queries import profile_by_user_id
 from src.modules.v1.user.serializers import AuthenticateSerializer
 from src.helpers import output_json
 from src.constants import RESPONSE_FAILED, AUTHORIZATION_HEADER_DOES_NOT_EXISTS, INVALID_SIGNATURE, EXPIRED_SIGNATURE, USER_IDENTIFIER_NOT_FOUND_IN_JWT, USER_NOT_FOUND, AUTHORIZATION_PARSE_ERROR, USER_DOES_NOT_MATCH
@@ -46,6 +47,7 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
                 'phone_number': user.phone_number,
                 'is_verified': user.is_verified,
                 'last_login': user.last_login,
+                'profile_code': payload.get('profile_code'),
                 'roles': payload.get('roles')
             }
         )
@@ -57,6 +59,7 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
     
     @classmethod
     def create_access_token(cls, user):
+        profile = profile_by_user_id(user.get('id')).values().first()
         roles = role_by_user_id(user.get('id')).values_list('role', flat=True)
         payload = {
             'user_identifier': user.get('id'),
@@ -65,6 +68,7 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
             'username': user.get('username'),
             'email': user.get('email'),
             'phone_number': user.get('phone_number'),
+            'profile_code': profile.get('code'),
             'roles': list(roles),
         }
 

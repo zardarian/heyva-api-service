@@ -8,6 +8,7 @@ from src.modules.v1.role import controllers as role_controller
 from src.modules.v1.profile import controllers as profile_controller
 from src.modules.v1.article import controllers as article_controller
 from src.modules.v1.article_attachment import controllers as article_attachment_controller
+from src.modules.v1.mood_tracker import controllers as mood_tracker_controller
 
 api = 'api'
 version = 'v1'
@@ -44,4 +45,9 @@ urlpatterns = [
     # Article Attachment
     path("{}/{}/article-attachment/create".format(api, version), article_attachment_controller.create),
     path("{}/{}/article-attachment/get-unused".format(api, version), article_attachment_controller.read_unused),
+
+    # Mood Tracker
+    path("{}/{}/mood-tracker/create".format(api, version), mood_tracker_controller.create),
+    path("{}/{}/mood-tracker/list".format(api, version), mood_tracker_controller.read_list),
+    path("{}/{}/mood-tracker/private-list".format(api, version), mood_tracker_controller.read_list_by_auth),
 ]

@@ -47,4 +47,5 @@ class AuthenticateSerializer(serializers.Serializer):
     phone_number = serializers.CharField()
     is_verified = serializers.BooleanField()
     last_login = serializers.DateTimeField()
+    profile_code = serializers.CharField()
     roles = serializers.ListField(child=serializers.CharField())
