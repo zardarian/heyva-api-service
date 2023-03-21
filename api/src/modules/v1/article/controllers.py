@@ -29,7 +29,7 @@ def create(request):
         article_uuid = uuid.uuid4()
 
         with transaction.atomic():
-            insert_payload = {
+            article_payload = {
                 'id' : str(article_uuid),
                 'created_at' : datetime.now(),
                 'created_by' : request.user.get('id'),
@@ -37,7 +37,7 @@ def create(request):
                 'title' : validated_payload.get('title'),
                 'body' : validated_payload.get('body'),
             }
-            Article(**insert_payload).save()
+            Article(**article_payload).save()
 
             tag_payload = []
             for tag in validated_payload.get('tag'):
@@ -57,7 +57,7 @@ def create(request):
                 article=str(article_uuid)
             )
         
-        return output_response(success=RESPONSE_SUCCESS, data={'id': insert_payload.get('id')}, message=None, error=None, status_code=200)
+        return output_response(success=RESPONSE_SUCCESS, data={'id': article_payload.get('id')}, message=None, error=None, status_code=200)
     except Exception as e:
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename

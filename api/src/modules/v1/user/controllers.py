@@ -60,7 +60,7 @@ def register(request):
             if unverified_user:
                 user_exists(validated_payload.get('username'), validated_payload.get('email'), validated_payload.get('phone_number')).delete()
 
-            insert_payload = {
+            user_payload = {
                 'id' : str(user_uuid),
                 'created_at' : datetime.now(),
                 'created_by' : user_uuid,
@@ -71,7 +71,7 @@ def register(request):
                 'password' : make_password(validated_payload.get('password')),
                 'is_verified': False,
             }
-            User(**insert_payload).save()
+            User(**user_payload).save()
 
             role_payload = {
                 'id' : role_uuid,
@@ -118,7 +118,7 @@ def register(request):
                 interest_payload.append(payload)
             Interest.objects.bulk_create(interest_payload)
 
-            registration_token = CustomJWTAuthentication.create_registration_token(insert_payload)
+            registration_token = CustomJWTAuthentication.create_registration_token(user_payload)
             if validated_payload.get('email'):
                 message = render_to_string('user_registration.html', {
                     'page_title': 'Account Verification',
@@ -135,7 +135,7 @@ def register(request):
                 })
                 send_email('User Activation', message, [validated_payload.get('email')], html_message=message)
         
-        return output_response(success=RESPONSE_SUCCESS, data={'id': insert_payload.get('id')}, message=None, error=None, status_code=200)
+        return output_response(success=RESPONSE_SUCCESS, data={'id': user_payload.get('id')}, message=None, error=None, status_code=200)
     except Exception as e:
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename

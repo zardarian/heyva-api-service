@@ -24,7 +24,7 @@ def update(request, user_id):
     validated_payload = payload.validated_data
     try:
         with transaction.atomic():
-            insert_payload = []
+            role_payload = []
             role_by_user_id(user_id).delete()
 
             for role in validated_payload.get('roles'):
@@ -38,8 +38,8 @@ def update(request, user_id):
                     user = user_by_id(user_id).first(),
                     role = dictionary_by_id(role).first()
                 )
-                insert_payload.append(payload)
-            Role.objects.bulk_create(insert_payload)
+                role_payload.append(payload)
+            Role.objects.bulk_create(role_payload)
         
         return output_response(success=RESPONSE_SUCCESS, data=None, message=SUCCESSFULLY_UPDATE, error=None, status_code=200)
     except Exception as e:

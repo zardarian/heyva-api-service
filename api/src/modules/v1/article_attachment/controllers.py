@@ -25,7 +25,7 @@ def create(request):
     validated_payload = payload.validated_data
     try:
         with transaction.atomic():
-            attachment_payload = []
+            article_attachment_payload = []
             
             for attachment in validated_payload.get('attachment'):
                 attachment_uuid = uuid.uuid4()
@@ -38,12 +38,12 @@ def create(request):
                     article=article_by_id(validated_payload.get('article')).first(),
                     attachment=attachment_path
                 )
-                attachment_payload.append(payload)
-            ArticleAttachment.objects.bulk_create(attachment_payload)
+                article_attachment_payload.append(payload)
+            ArticleAttachment.objects.bulk_create(article_attachment_payload)
         
-        return output_response(success=RESPONSE_SUCCESS, data=ArticleAttachmentSerializer(attachment_payload, many=True).data, message=None, error=None, status_code=200)
+        return output_response(success=RESPONSE_SUCCESS, data=ArticleAttachmentSerializer(article_attachment_payload, many=True).data, message=None, error=None, status_code=200)
     except Exception as e:
-        for payload in attachment_payload:
+        for payload in article_attachment_payload:
             remove_object(payload.attachment)
 
         exception_type, exception_object, exception_traceback = sys.exc_info()

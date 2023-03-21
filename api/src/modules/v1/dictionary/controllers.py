@@ -23,7 +23,7 @@ def create(request):
         dictionary_uuid = uuid.uuid4()
         
         with transaction.atomic():
-            insert_payload = {
+            dictionary_payload = {
                 'id' : str(dictionary_uuid),
                 'created_at' : datetime.now(),
                 'created_by' : request.user.get('id'),
@@ -32,9 +32,9 @@ def create(request):
                 'parent' : validated_payload.get('parent'),
                 'is_active' : True
             }
-            Dictionary(**insert_payload).save()
+            Dictionary(**dictionary_payload).save()
         
-        return output_response(success=RESPONSE_SUCCESS, data={'id': insert_payload.get('id')}, message=None, error=None, status_code=200)
+        return output_response(success=RESPONSE_SUCCESS, data={'id': dictionary_payload.get('id')}, message=None, error=None, status_code=200)
     except Exception as e:
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename
