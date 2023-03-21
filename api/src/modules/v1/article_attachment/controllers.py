@@ -1,9 +1,10 @@
 from django.db import transaction
-from rest_framework.decorators import api_view, authentication_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from src.paginations.page_number_pagination import CustomPageNumberPagination   
 from src.helpers import output_response
 from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJECTS_NOT_FOUND
 from src.authentications.jwt_auth import CustomJWTAuthentication
+from src.permissions.admin_permission import IsAdmin
 from src.storages.services import put_object, remove_object
 from src.modules.v1.article.queries import article_by_id
 from datetime import datetime
@@ -15,6 +16,7 @@ import sys
 
 @api_view(['POST'])
 @authentication_classes([CustomJWTAuthentication])
+@permission_classes([IsAdmin])
 def create(request):
     payload = CreateArticleAttachmentSerializer(data=request.data)
     if not payload.is_valid():
@@ -52,6 +54,7 @@ def create(request):
     
 @api_view(['GET'])
 @authentication_classes([CustomJWTAuthentication])
+@permission_classes([IsAdmin])
 def read_unused(request):
     try:
         paginator = CustomPageNumberPagination()

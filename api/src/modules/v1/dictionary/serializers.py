@@ -4,12 +4,12 @@ from .models import Dictionary
 class DictionarySerializer(serializers.ModelSerializer):
     class Meta:
         model = Dictionary
-        fields = ['id', 'type', 'name', 'parent']
+        fields = ['id', 'type', 'name', 'parent', 'icon']
 
 class DictionaryRelationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dictionary
-        fields = ['id', 'type', 'name', 'parent']
+        fields = ['id', 'type', 'name', 'parent', 'icon']
 
 class CreateDictionarySerializer(serializers.Serializer):
     type = serializers.CharField(required=True)

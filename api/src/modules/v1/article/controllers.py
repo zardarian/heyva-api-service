@@ -1,10 +1,11 @@
 from django.db import transaction
-from rest_framework.decorators import api_view, authentication_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from src.paginations.page_number_pagination import CustomPageNumberPagination
 from src.helpers import output_response
 from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJECTS_NOT_FOUND
 from src.authentications.basic_auth import CustomBasicAuthentication
 from src.authentications.jwt_auth import CustomJWTAuthentication
+from src.permissions.admin_permission import IsAdmin
 from src.modules.v1.article_tag.models import ArticleTag
 from src.modules.v1.dictionary.queries import dictionary_by_id
 from src.modules.v1.article_attachment.queries import article_attachment_by_multiple_id
@@ -17,6 +18,7 @@ import sys
 
 @api_view(['POST'])
 @authentication_classes([CustomJWTAuthentication])
+@permission_classes([IsAdmin])
 def create(request):
     payload = CreateArticleSerializer(data=request.data)
     if not payload.is_valid():
