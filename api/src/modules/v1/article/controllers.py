@@ -52,10 +52,11 @@ def create(request):
                 tag_payload.append(payload)
             ArticleTag.objects.bulk_create(tag_payload)
 
-            article_attachment = article_attachment_by_multiple_id(validated_payload.get('attachment'))
-            article_attachment.update(
-                article=str(article_uuid)
-            )
+            if validated_payload.get('attachment'):
+                article_attachment = article_attachment_by_multiple_id(validated_payload.get('attachment'))
+                article_attachment.update(
+                    article=str(article_uuid)
+                )
         
         return output_response(success=RESPONSE_SUCCESS, data={'id': article_payload.get('id')}, message=None, error=None, status_code=200)
     except Exception as e:

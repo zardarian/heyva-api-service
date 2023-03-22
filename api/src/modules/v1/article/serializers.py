@@ -30,7 +30,7 @@ class CreateArticleSerializer(serializers.Serializer):
     title = serializers.CharField(required=True)
     body = serializers.CharField(required=True)
     tag = serializers.ListField(required=True)
-    attachment = serializers.ListField(required=False, child=serializers.CharField())
+    attachment = serializers.ListField(required=False, child=serializers.CharField(required=False))
 
 class ReadSerializer(serializers.Serializer):
     search = serializers.CharField(required=False)
