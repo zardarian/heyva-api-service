@@ -6,6 +6,7 @@ from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJ
 from src.authentications.jwt_auth import CustomJWTAuthentication
 from src.permissions.admin_permission import IsAdmin
 from src.modules.v1.profile.queries import profile_by_code
+from src.modules.v1.dictionary.queries import dictionary_by_id
 from datetime import datetime
 from .serializers import CreateMoodTrackerSerializer, ReadListMoodTrackerSerializer, MoodTrackerSerializer
 from .models import MoodTracker
@@ -23,16 +24,21 @@ def create(request):
     validated_payload = payload.validated_data
     try:
         mood_tracker_uuid = uuid.uuid4()
+        mood_value = 0
+        mood_feel = dictionary_by_id(validated_payload.get('mood_feel')).values().first()
+        if mood_feel:
+            mood_value = mood_feel.get('value')
 
         with transaction.atomic():
             mood_tracker_payload = {
                 'id' : mood_tracker_uuid,
                 'created_at' : datetime.now(),
                 'created_by' : request.user.get('id'),
-                'profile_code' : profile_by_code(validated_payload.get('profile_code')).first(),
+                'profile_code' : profile_by_code(request.user.get('profile_code')).first(),
                 'mood_feel' : validated_payload.get('mood_feel'),
                 'mood_source' : validated_payload.get('mood_source'),
-                'more' : validated_payload.get('mode'),
+                'more' : validated_payload.get('more'),
+                'mood_value': mood_value,
             }
             MoodTracker(**mood_tracker_payload).save()
         

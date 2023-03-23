@@ -12,6 +12,7 @@ class MoodTracker(models.Model):
     mood_feel = models.TextField(blank=True, null=True)
     mood_source = models.TextField(blank=True, null=True)
     more = models.TextField(blank=True, null=True)
+    mood_value = models.BigIntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
