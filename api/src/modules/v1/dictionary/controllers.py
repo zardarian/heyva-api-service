@@ -1,9 +1,10 @@
 from django.db import transaction
-from rest_framework.decorators import api_view, authentication_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from src.helpers import output_response
 from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJECTS_NOT_FOUND
 from src.authentications.basic_auth import CustomBasicAuthentication
 from src.authentications.jwt_auth import CustomJWTAuthentication
+from src.permissions.super_admin_permission import IsSuperAdmin
 from datetime import datetime
 from .serializers import CreateDictionarySerializer, ReadByTypeDictionarySerializer, DictionarySerializer, UpdateDictionarySerializer
 from .models import Dictionary
@@ -13,6 +14,7 @@ import sys
 
 @api_view(['POST'])
 @authentication_classes([CustomJWTAuthentication])
+@permission_classes([IsSuperAdmin])
 def create(request):
     payload = CreateDictionarySerializer(data=request.data)
     if not payload.is_valid():
@@ -63,6 +65,7 @@ def read_by_type(request):
 
 @api_view(['PUT'])
 @authentication_classes([CustomJWTAuthentication])
+@permission_classes([IsSuperAdmin])
 def update(request, id):
     payload = UpdateDictionarySerializer(data=request.data)
     if not payload.is_valid():
@@ -95,6 +98,7 @@ def update(request, id):
 
 @api_view(['DELETE'])
 @authentication_classes([CustomJWTAuthentication])
+@permission_classes([IsSuperAdmin])
 def delete(request, id):
     try:
         dictionary = dictionary_by_id(id)
@@ -117,6 +121,7 @@ def delete(request, id):
 
 @api_view(['POST'])
 @authentication_classes([CustomJWTAuthentication])
+@permission_classes([IsSuperAdmin])
 def activate(request, id):
     try:
         dictionary = dictionary_by_id(id)
@@ -140,6 +145,7 @@ def activate(request, id):
 
 @api_view(['POST'])
 @authentication_classes([CustomJWTAuthentication])
+@permission_classes([IsSuperAdmin])
 def deactivate(request, id):
     try:
         dictionary = dictionary_by_id(id)

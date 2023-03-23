@@ -13,6 +13,7 @@ class Dictionary(models.Model):
     parent = models.CharField(max_length=36, blank=True, null=True)
     is_active = models.BooleanField()
     icon = models.TextField(blank=True, null=True)
+    value = models.BigIntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
