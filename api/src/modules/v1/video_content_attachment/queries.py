@@ -27,4 +27,4 @@ def video_content_attachment_by_video_content_id(video_content_id):
     return VideoContentAttachment.objects.filter(
         video_content=video_content_id,
         deleted_at__isnull=True,
-    )
+    ).order_by('attachment_order')
