@@ -25,6 +25,6 @@ def article_attachment_by_multiple_id(ids):
 
 def article_attachment_by_article_id(article_id):
     return ArticleAttachment.objects.filter(
-        article_id=article_id,
+        article=article_id,
         deleted_at__isnull=True,
     )
