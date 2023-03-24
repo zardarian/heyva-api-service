@@ -11,6 +11,8 @@ from src.modules.v1.article_attachment import controllers as article_attachment_
 from src.modules.v1.mood_tracker import controllers as mood_tracker_controller
 from src.modules.v1.video_content import controllers as video_content_controller
 from src.modules.v1.video_content_attachment import controllers as video_content_attachment_controller
+from src.modules.v1.video_content_personal import controllers as video_content_personal_controller
+from src.modules.v1.video_content_attachment_personal import controllers as video_content_attachment_personal_controller
 
 api = 'api'
 version = 'v1'
@@ -61,4 +63,10 @@ urlpatterns = [
     # Video Content Attachment
     path("{}/{}/video-content-attachment/create".format(api, version), video_content_attachment_controller.create),
     path("{}/{}/video-content-attachment/get-unused".format(api, version), video_content_attachment_controller.read_unused),
+
+    # Video Content Personal
+    path("{}/{}/video-content-personal/create".format(api, version), video_content_personal_controller.create),
+
+    # Video Content Attachment Personal
+    path("{}/{}/video-content-attachment-personal/create".format(api, version), video_content_attachment_personal_controller.create),
 ]

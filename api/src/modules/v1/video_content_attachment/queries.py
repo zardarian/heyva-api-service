@@ -11,7 +11,7 @@ def video_content_attachment_unused():
 
 def video_content_attachment_by_id(id):
     video_content_attachment = VideoContentAttachment.objects.filter(
-        id__in=id
+        id=id
     )
     
     return video_content_attachment
