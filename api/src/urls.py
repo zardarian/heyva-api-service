@@ -9,6 +9,8 @@ from src.modules.v1.profile import controllers as profile_controller
 from src.modules.v1.article import controllers as article_controller
 from src.modules.v1.article_attachment import controllers as article_attachment_controller
 from src.modules.v1.mood_tracker import controllers as mood_tracker_controller
+from src.modules.v1.video_content import controllers as video_content_controller
+from src.modules.v1.video_content_attachment import controllers as video_content_attachment_controller
 
 api = 'api'
 version = 'v1'
@@ -50,4 +52,13 @@ urlpatterns = [
     path("{}/{}/mood-tracker/create".format(api, version), mood_tracker_controller.create),
     path("{}/{}/mood-tracker/list".format(api, version), mood_tracker_controller.read_list),
     path("{}/{}/mood-tracker/private-list".format(api, version), mood_tracker_controller.read_list_by_auth),
+
+    # Video Content
+    path("{}/{}/video-content/create".format(api, version), video_content_controller.create),
+    path("{}/{}/video-content/list".format(api, version), video_content_controller.read_list),
+    path("{}/{}/video-content/<id>".format(api, version), video_content_controller.read_by_id),
+
+    # Video Content Attachment
+    path("{}/{}/video-content-attachment/create".format(api, version), video_content_attachment_controller.create),
+    path("{}/{}/video-content-attachment/get-unused".format(api, version), video_content_attachment_controller.read_unused),
 ]
