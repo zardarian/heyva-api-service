@@ -97,11 +97,16 @@ def read_list(request):
 @authentication_classes([CustomBasicAuthentication])
 def read_by_id(request, id):
     try:
-        video_content = video_content_by_id(id)
+        video_content = video_content_by_id(id).first()
         if not video_content:
             return output_response(success=RESPONSE_FAILED, data=None, message=OBJECTS_NOT_FOUND, error=None, status_code=400)
 
-        return output_response(success=RESPONSE_SUCCESS, data=VideoContentSerializer(video_content, many=True).data, message=None, error=None, status_code=200)
+        if request.user.get('is_bearer') == True:
+            serializer = VideoContentByAuthSerializer(video_content, context={'request': request}).data
+        else:
+            serializer = VideoContentSerializer(video_content).data
+
+        return output_response(success=RESPONSE_SUCCESS, data=serializer, message=None, error=None, status_code=200)
     except Exception as e:
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename
