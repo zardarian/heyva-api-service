@@ -48,7 +48,8 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
                 'is_verified': user.is_verified,
                 'last_login': user.last_login,
                 'profile_code': payload.get('profile_code'),
-                'roles': payload.get('roles')
+                'roles': payload.get('roles'),
+                'is_bearer': True
             }
         )
         

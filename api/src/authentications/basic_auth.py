@@ -2,6 +2,8 @@ from rest_framework import authentication, exceptions
 from django.conf import settings
 from src.helpers import output_json
 from src.constants import RESPONSE_FAILED, AUTHORIZATION_HEADER_DOES_NOT_EXISTS, AUTHORIZATION_HEADER_DOES_NOT_CONFIGURED_PROPERLY, AUTHORIZATION_HEADER_DOES_NOT_MATCH
+from src.authentications.jwt_auth import CustomJWTAuthentication
+from src.modules.v1.user.serializers import AuthenticateSerializer
 import base64
 
 class CustomBasicAuthentication(authentication.BaseAuthentication):
@@ -10,6 +12,8 @@ class CustomBasicAuthentication(authentication.BaseAuthentication):
         if not auth_header:
             output = output_json(success=RESPONSE_FAILED, data=None, message=AUTHORIZATION_HEADER_DOES_NOT_EXISTS, error=None)
             raise exceptions.AuthenticationFailed(output)
+        if auth_header.split(' ')[0] == 'Bearer':
+            return CustomJWTAuthentication.authenticate(self, request)
         if auth_header.split(' ')[0] != 'Basic':
             output = output_json(success=RESPONSE_FAILED, data=None, message=AUTHORIZATION_HEADER_DOES_NOT_CONFIGURED_PROPERLY, error=None)
             raise exceptions.AuthenticationFailed(output)
@@ -25,6 +29,13 @@ class CustomBasicAuthentication(authentication.BaseAuthentication):
         if username != settings.BASIC_AUTH_USERNAME or password != settings.BASIC_AUTH_PASSWORD:
             output = output_json(success=RESPONSE_FAILED, data=None, message=AUTHORIZATION_HEADER_DOES_NOT_MATCH, error=None)
             raise exceptions.AuthenticationFailed(output)
+        
+        serialized_user = AuthenticateSerializer(
+            {
+                'is_bearer': False
+            }
+        )
+        return serialized_user.data, {}
     
     def authenticate_header(self, request):
         return 'Basic'

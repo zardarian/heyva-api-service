@@ -10,7 +10,7 @@ from src.modules.v1.video_content_tag.models import VideoContentTag
 from src.modules.v1.dictionary.queries import dictionary_by_id
 from src.modules.v1.video_content_attachment.queries import video_content_attachment_by_multiple_id
 from datetime import datetime
-from .serializers import CreateVideoContentSerializer, VideoContentSerializer, ReadVideoContentSerializer
+from .serializers import CreateVideoContentSerializer, VideoContentSerializer, ReadVideoContentSerializer, VideoContentByAuthSerializer
 from .models import VideoContent
 from .queries import video_content_active, video_content_by_id
 import uuid
@@ -80,7 +80,10 @@ def read_list(request):
         paginator = CustomPageNumberPagination()
         video_content = video_content_active(validated_payload.get('search'), validated_payload.get('tag'))
         result_page = paginator.paginate_queryset(video_content, request)
-        serializer = VideoContentSerializer(result_page, many=True)
+        if request.user.get('is_bearer') == True:
+            serializer = VideoContentByAuthSerializer(result_page, context={'request': request}, many=True)
+        else:
+            serializer = VideoContentSerializer(result_page, many=True)
 
         return paginator.get_paginated_response(success=RESPONSE_SUCCESS, data=serializer.data, message=None, error=None, status_code=200)
     except Exception as e:
