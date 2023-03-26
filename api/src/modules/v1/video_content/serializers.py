@@ -11,10 +11,11 @@ from .models import VideoContent
 class VideoContentSerializer(serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
     attachments = serializers.SerializerMethodField()
+    banner = serializers.SerializerMethodField()
 
     class Meta:
         model = VideoContent
-        fields = ['id', 'title', 'body', 'creator', 'tags', 'attachments']
+        fields = ['id', 'title', 'body', 'creator', 'tags', 'attachments', 'banner']
 
     def get_tags(self, obj):
         tags = video_content_tag_by_video_content_id(obj.id)
@@ -24,14 +25,18 @@ class VideoContentSerializer(serializers.ModelSerializer):
         attachments = video_content_attachment_by_video_content_id(obj.id)
         return VideoContentAttachmentRelationSerializer(attachments, many=True).data
     
+    def get_banner(self, obj):
+        return get_object(obj.banner)
+    
 class VideoContentByAuthSerializer(serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
     attachments = serializers.SerializerMethodField()
     is_finished = serializers.SerializerMethodField()
+    banner = serializers.SerializerMethodField()
 
     class Meta:
         model = VideoContent
-        fields = ['id', 'title', 'body', 'creator', 'tags', 'attachments', 'is_finished']
+        fields = ['id', 'title', 'body', 'creator', 'tags', 'attachments', 'is_finished', 'banner']
 
     def get_tags(self, obj):
         tags = video_content_tag_by_video_content_id(obj.id)
@@ -46,6 +51,9 @@ class VideoContentByAuthSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         video_content_personal = video_content_personal_by_profile_code_and_video_content_id(request.user.get('profile_code'), obj.id).first()
         return VideoContentPersonalRelationSerializer(video_content_personal).data
+    
+    def get_banner(self, obj):
+        return get_object(obj.banner)
 
 class CreateVideoContentSerializer(serializers.Serializer):
     title = serializers.CharField(required=True)
@@ -53,6 +61,7 @@ class CreateVideoContentSerializer(serializers.Serializer):
     creator = serializers.CharField(required=False)
     tag = serializers.ListField(required=True)
     attachment = serializers.ListField(required=False, child=serializers.CharField(required=False))
+    banner = serializers.FileField(required=True)
 
 class ReadVideoContentSerializer(serializers.Serializer):
     search = serializers.CharField(required=False)

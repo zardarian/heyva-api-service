@@ -13,6 +13,7 @@ class VideoContentAttachment(models.Model):
     attachment = models.TextField(blank=True, null=True)
     attachment_title = models.TextField(blank=True, null=True)
     attachment_length = models.BigIntegerField(blank=True, null=True)
+    thumbnail = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False

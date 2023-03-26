@@ -30,6 +30,7 @@ def create(request):
             for index, attachment in enumerate(validated_payload.get('attachment')):
                 attachment_uuid = uuid.uuid4()
                 attachment_path = put_object('video-content', attachment)
+                attachment_thumbnail_path = put_object('video-content/thumbnail', validated_payload.get('thumbnail')[index])
                 attachment_order = index + 1
 
                 payload = VideoContentAttachment(
@@ -39,7 +40,8 @@ def create(request):
                     video_content=video_content_by_id(validated_payload.get('video_content')).first(),
                     attachment_order=attachment_order,
                     attachment=attachment_path,
-                    attachment_title=validated_payload.get('attachment_title')[index]
+                    attachment_title=validated_payload.get('attachment_title')[index],
+                    thumbnail=attachment_thumbnail_path
                 )
                 video_content_attachment_payload.append(payload)
             VideoContentAttachment.objects.bulk_create(video_content_attachment_payload)
@@ -48,6 +50,7 @@ def create(request):
     except Exception as e:
         for payload in video_content_attachment_payload:
             remove_object(payload.attachment)
+            remove_object(payload.thumbnail)
 
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename

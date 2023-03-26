@@ -2,6 +2,7 @@ from django.db import transaction
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from src.paginations.page_number_pagination import CustomPageNumberPagination
 from src.helpers import output_response
+from src.storages.services import put_object, remove_object
 from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJECTS_NOT_FOUND
 from src.authentications.basic_auth import CustomBasicAuthentication
 from src.authentications.jwt_auth import CustomJWTAuthentication
@@ -29,6 +30,8 @@ def create(request):
         video_content_uuid = uuid.uuid4()
 
         with transaction.atomic():
+            banner_path = put_object('video-content/banner', validated_payload.get('banner'))
+
             video_content_payload = {
                 'id' : video_content_uuid,
                 'created_at' : datetime.now(),
@@ -37,6 +40,7 @@ def create(request):
                 'title' : validated_payload.get('title'),
                 'body' : validated_payload.get('body'),
                 'creator': validated_payload.get('creator'),
+                'banner': banner_path
             }
             VideoContent(**video_content_payload).save()
 
@@ -61,6 +65,8 @@ def create(request):
         
         return output_response(success=RESPONSE_SUCCESS, data={'id': video_content_payload.get('id')}, message=None, error=None, status_code=200)
     except Exception as e:
+        remove_object(validated_payload.get('banner'))
+            
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename
         line_number = exception_traceback.tb_lineno
