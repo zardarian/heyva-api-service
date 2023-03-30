@@ -40,6 +40,7 @@ urlpatterns = [
 
     # Profile
     path("{}/{}/profile".format(api, version), profile_controller.get_profile),
+    path("{}/{}/profile/update".format(api, version), profile_controller.update),
 
     # Article
     path("{}/{}/article/create".format(api, version), article_controller.create),
