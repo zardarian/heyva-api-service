@@ -5,7 +5,7 @@ from rest_framework import exceptions
 from rest_framework.decorators import api_view, authentication_classes
 from django.template.loader import render_to_string
 from src.helpers import output_response, generate_registration_url, encrypt, decrypt
-from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, USER_ALREADY_EXISTS, USER_DOES_NOT_EXISTS, PASSWORD_DOES_NOT_MATCH, MULTIPLE_ROWS_RETURNED, AUTHENTICATION_FAILED, GENDER_FEMALE, ROLE_USER, USER_VERIFICATION_SUCCESS
+from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, USER_ALREADY_EXISTS, USER_DOES_NOT_EXISTS, PASSWORD_DOES_NOT_MATCH, MULTIPLE_ROWS_RETURNED, AUTHENTICATION_FAILED, GENDER_FEMALE, ROLE_USER, USER_VERIFICATION_SUCCESS, CONFIRM_PASSWORD_DOES_NOT_MATCH
 from src.authentications.basic_auth import CustomBasicAuthentication
 from src.authentications.jwt_auth import CustomJWTAuthentication
 from src.mails.services import send_email
@@ -17,7 +17,7 @@ from src.modules.v1.dictionary.queries import dictionary_by_id
 from src.modules.v1.user.queries import user_by_id
 from src.modules.v1.profile.queries import get_latest_profile_id_today, profile_by_code, profile_by_user_id
 from datetime import datetime
-from .serializers import RegisterSerializer, LoginSerializer, LoginResponseSerializer, UserSerializer, RefreshTokenSerializer
+from .serializers import RegisterSerializer, LoginSerializer, LoginResponseSerializer, UserSerializer, RefreshTokenSerializer, ChangePasswordSerializer
 from .models import User
 from .queries import user_registered, user_registered_not_verified, user_exists, user_by_id, user_exists_verified
 from django.shortcuts import render
@@ -279,6 +279,41 @@ def get_user(request):
         serialize_user = UserSerializer(user).data
 
         return output_response(success=RESPONSE_SUCCESS, data=serialize_user, message=None, error=None, status_code=200)
+    except Exception as e:
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        error_message = "{}:{}".format(filename, line_number)
+        return output_response(success=RESPONSE_ERROR, data=None, message=error_message, error=str(e), status_code=500)
+
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication])
+def change_password(request):
+    payload = ChangePasswordSerializer(data=request.data)
+    if not payload.is_valid():
+        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=payload.errors, status_code=400)
+    
+    validated_payload = payload.validated_data
+    try:
+        user = user_by_id(request.user.get('id'))
+        if not user:
+            return output_response(success=RESPONSE_FAILED, data=None, message=USER_DOES_NOT_EXISTS, error=None, status_code=404)
+        
+        legacy = user.values().first()
+        password_match = check_password(validated_payload.get('old_password'), legacy.get('password'))
+        if not password_match:
+            return output_response(success=RESPONSE_FAILED, data=None, message=PASSWORD_DOES_NOT_MATCH, error=None, status_code=401)
+        
+        if validated_payload.get('new_password') != validated_payload.get('confirm_new_password'):
+            return output_response(success=RESPONSE_FAILED, data=None, message=CONFIRM_PASSWORD_DOES_NOT_MATCH, error=None, status_code=401)
+        
+        user.update(
+            updated_at=datetime.now(),
+            updated_by=request.user.get('id'),
+            password=make_password(validated_payload.get('new_password'))
+        )
+
+        return output_response(success=RESPONSE_SUCCESS, data={'id': legacy.get('id')}, message=None, error=None, status_code=200)
     except Exception as e:
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename

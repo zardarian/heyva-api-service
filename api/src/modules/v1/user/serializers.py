@@ -50,3 +50,8 @@ class AuthenticateSerializer(serializers.Serializer):
     profile_code = serializers.CharField(required=False)
     roles = serializers.ListField(required=False, child=serializers.CharField(required=False))
     is_bearer = serializers.BooleanField(required=False)
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+    confirm_new_password = serializers.CharField(required=True)
