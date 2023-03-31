@@ -13,6 +13,7 @@ from src.modules.v1.video_content import controllers as video_content_controller
 from src.modules.v1.video_content_attachment import controllers as video_content_attachment_controller
 from src.modules.v1.video_content_personal import controllers as video_content_personal_controller
 from src.modules.v1.video_content_attachment_personal import controllers as video_content_attachment_personal_controller
+from src.modules.v1.program import controllers as program_controller
 
 api = 'api'
 version = 'v1'
@@ -71,4 +72,7 @@ urlpatterns = [
 
     # Video Content Attachment Personal
     path("{}/{}/video-content-attachment-personal/create".format(api, version), video_content_attachment_personal_controller.create),
+
+    # Program
+    path("{}/{}/program/create".format(api, version), program_controller.create),
 ]
