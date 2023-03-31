@@ -76,4 +76,5 @@ urlpatterns = [
     # Program
     path("{}/{}/program/create".format(api, version), program_controller.create),
     path("{}/{}/program/list".format(api, version), program_controller.read_list),
+    path("{}/{}/program/<id>".format(api, version), program_controller.read_by_id),
 ]
