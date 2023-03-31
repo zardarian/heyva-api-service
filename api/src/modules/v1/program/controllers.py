@@ -10,9 +10,9 @@ from src.permissions.admin_permission import IsAdmin
 from src.modules.v1.program_tag.models import ProgramTag
 from src.modules.v1.dictionary.queries import dictionary_by_id
 from datetime import datetime
-from .serializers import CreateProgramSerializer
+from .serializers import CreateProgramSerializer, ReadProgramSerializer, ProgramSerializer, ProgramByAuthSerializer
 from .models import Program
-from .queries import program_by_id
+from .queries import program_by_id, program_active_parent
 import uuid
 import sys
 
@@ -39,7 +39,9 @@ def create(request):
                 'title' : validated_payload.get('title'),
                 'body' : validated_payload.get('body'),
                 'banner' : banner_path,
-                'parent' : validated_payload.get('parent')
+                'parent' : program_by_id(validated_payload.get('parent')).first(),
+                'order': validated_payload.get('order'),
+
             }
             Program(**program_payload).save()
 
@@ -60,6 +62,32 @@ def create(request):
     except Exception as e:
         remove_object(validated_payload.get('banner'))
             
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        error_message = "{}:{}".format(filename, line_number)
+        return output_response(success=RESPONSE_ERROR, data=None, message=error_message, error=str(e), status_code=500)
+    
+@api_view(['GET'])
+@authentication_classes([CustomBasicAuthentication])
+def read_list(request):
+    try:
+        payload = ReadProgramSerializer(data=request.query_params)
+        if not payload.is_valid():
+            return output_response(success=RESPONSE_FAILED, data=None, message=None, error=payload.errors, status_code=400)
+        
+        validated_payload = payload.validated_data
+
+        paginator = CustomPageNumberPagination()
+        program = program_active_parent(validated_payload.get('search'), validated_payload.get('tag'))
+        result_page = paginator.paginate_queryset(program, request)
+        if request.user.get('is_bearer') == True:
+            serializer = ProgramByAuthSerializer(result_page, context={'request': request}, many=True)
+        else:
+            serializer = ProgramSerializer(result_page, many=True)
+
+        return paginator.get_paginated_response(success=RESPONSE_SUCCESS, data=serializer.data, message=None, error=None, status_code=200)
+    except Exception as e:
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename
         line_number = exception_traceback.tb_lineno

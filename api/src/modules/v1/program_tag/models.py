@@ -8,7 +8,7 @@ class ProgramTag(models.Model):
     updated_by = models.CharField(max_length=36, blank=True, null=True)
     deleted_at = models.DateTimeField(blank=True, null=True)
     deleted_by = models.CharField(max_length=36, blank=True, null=True)
-    program = models.ForeignKey('Program', models.DO_NOTHING, blank=True, null=True)
+    program = models.ForeignKey('Program', models.DO_NOTHING, blank=True, null=True, related_name='program_tag')
     tag = models.ForeignKey('Dictionary', models.DO_NOTHING, blank=True, null=True)
 
     class Meta:

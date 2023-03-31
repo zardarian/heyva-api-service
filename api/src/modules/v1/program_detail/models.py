@@ -14,6 +14,7 @@ class ProgramDetail(models.Model):
     image_content = models.TextField(blank=True, null=True)
     video_content = models.TextField(blank=True, null=True)
     json_content = models.JSONField(blank=True, null=True)
+    order = models.BigIntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
