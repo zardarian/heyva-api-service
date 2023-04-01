@@ -16,6 +16,7 @@ from src.modules.v1.video_content_attachment_personal import controllers as vide
 from src.modules.v1.program import controllers as program_controller
 from src.modules.v1.program_detail import controllers as program_detail_controller
 from src.modules.v1.program_personal import controllers as program_personal_controller
+from src.modules.v1.program_personal_tracker import controllers as program_personal_tracker_controller
 
 api = 'api'
 version = 'v1'
@@ -86,4 +87,8 @@ urlpatterns = [
     # Program Personal
     path("{}/{}/program-personal/create".format(api, version), program_personal_controller.create),
     path("{}/{}/program-personal/finish/<program_id>".format(api, version), program_personal_controller.finish_program),
+
+    # Program Personal Tracker
+    path("{}/{}/program-personal-tracker/create".format(api, version), program_personal_tracker_controller.create),
+    path("{}/{}/program-personal-tracker/finish/<program_id>".format(api, version), program_personal_tracker_controller.finish_program),
 ]
