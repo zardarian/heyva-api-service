@@ -1,6 +1,6 @@
 from django.db import models
 
-class Doctor(models.Model):
+class DoctorAppointment(models.Model):
     id = models.CharField(primary_key=True, max_length=36)
     created_at = models.DateTimeField(blank=True, null=True)
     created_by = models.CharField(max_length=36, blank=True, null=True)
@@ -8,16 +8,12 @@ class Doctor(models.Model):
     updated_by = models.CharField(max_length=36, blank=True, null=True)
     deleted_at = models.DateTimeField(blank=True, null=True)
     deleted_by = models.CharField(max_length=36, blank=True, null=True)
-    is_active = models.BooleanField(blank=True, null=True)
-    code = models.CharField(unique=True, max_length=18, blank=True, null=True)
     profile_code = models.ForeignKey('Profile', models.DO_NOTHING, db_column='profile_code', to_field='code', blank=True, null=True)
-    name = models.TextField(blank=True, null=True)
-    specialist = models.CharField(max_length=36, blank=True, null=True)
-    about = models.TextField(blank=True, null=True)
-    rate = models.BigIntegerField(blank=True, null=True)
-    domicile = models.TextField(blank=True, null=True)
-    phone_number = models.TextField(blank=True, null=True)
+    doctor_code = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='doctor_code', to_field='code', blank=True, null=True)
+    date = models.DateField(blank=True, null=True)
+    hour = models.TimeField(blank=True, null=True)
+    service = models.ForeignKey('Dictionary', models.DO_NOTHING, db_column='service', blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'doctor'
+        db_table = 'doctor_appointment'

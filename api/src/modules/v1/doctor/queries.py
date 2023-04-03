@@ -15,6 +15,13 @@ def doctor_by_id(id):
         deleted_at__isnull=True,
     )
 
+def doctor_by_code(code):
+    return Doctor.objects.filter(
+        code=code,
+        is_active=True,
+        deleted_at__isnull=True,
+    )
+
 def doctor_active(search, tag):
     doctor = Doctor.objects.filter(
         is_active=True,
