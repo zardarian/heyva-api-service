@@ -15,6 +15,7 @@ class Doctor(models.Model):
     specialist = models.CharField(max_length=36, blank=True, null=True)
     about = models.TextField(blank=True, null=True)
     rate = models.BigIntegerField(blank=True, null=True)
+    domicile = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False

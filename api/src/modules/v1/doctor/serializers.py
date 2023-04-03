@@ -8,7 +8,7 @@ class DoctorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Doctor
-        fields = ['id', 'code', 'profile_code', 'name', 'specialist', 'about', 'rate', 'tags']
+        fields = ['id', 'code', 'profile_code', 'name', 'specialist', 'about', 'rate', 'domicile', 'tags']
 
     def get_tags(self, obj):
         tags = doctor_tag_by_doctor_id(obj.id)
@@ -20,6 +20,7 @@ class CreateDoctorSerializer(serializers.Serializer):
     specialist = serializers.CharField(required=False)
     about = serializers.CharField(required=True)
     rate = serializers.FloatField(required=False)
+    domicile = serializers.CharField(required=True)
     tag = serializers.ListField(required=True)
 
 class ReadDoctorSerializer(serializers.Serializer):
