@@ -25,6 +25,22 @@ class ArticleSerializer(serializers.ModelSerializer):
     def get_tags(self, obj):
         tags = article_tag_by_article_id(obj.id)
         return ArticleTagRelationSerializer(tags, many=True).data
+    
+class PreviewArticleSerializer(serializers.ModelSerializer):
+    rendered_body = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Article
+        fields = ['id', 'title', 'rendered_body']
+
+    def get_rendered_body(self, obj):
+        rendered_body = obj.body
+        article_attachments = article_attachment_by_article_id(obj.id)
+        
+        for article_attachment in article_attachments:
+            rendered_body = rendered_body.replace(article_attachment.id, get_object(article_attachment.attachment))
+        
+        return rendered_body
 
 class CreateArticleSerializer(serializers.Serializer):
     title = serializers.CharField(required=True)

@@ -19,6 +19,7 @@ from src.modules.v1.program_personal import controllers as program_personal_cont
 from src.modules.v1.program_personal_tracker import controllers as program_personal_tracker_controller
 from src.modules.v1.doctor import controllers as doctor_controller
 from src.modules.v1.doctor_appointment import controllers as doctor_appointment_controller
+from src.modules.v1.content import controllers as content_controller
 
 api = 'api'
 version = 'v1'
@@ -101,4 +102,7 @@ urlpatterns = [
 
     # Doctor Appointment
     path("{}/{}/doctor-appointment/create".format(api, version), doctor_appointment_controller.create),
+
+    # Content
+    path("{}/{}/content/list".format(api, version), content_controller.read_list),
 ]

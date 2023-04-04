@@ -27,6 +27,16 @@ class VideoContentSerializer(serializers.ModelSerializer):
     
     def get_banner(self, obj):
         return get_object(obj.banner)
+
+class PreviewVideoContentSerializer(serializers.ModelSerializer):
+    banner = serializers.SerializerMethodField()
+
+    class Meta:
+        model = VideoContent
+        fields = ['id', 'title', 'body', 'creator', 'banner']
+    
+    def get_banner(self, obj):
+        return get_object(obj.banner)
     
 class VideoContentByAuthSerializer(serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()

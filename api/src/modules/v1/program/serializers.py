@@ -37,6 +37,16 @@ class ProgramSerializer(serializers.ModelSerializer):
     
     def get_days_count(self, obj):
         return None
+    
+class PreviewProgramSerializer(serializers.ModelSerializer):
+    banner = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Program
+        fields = ['id', 'title', 'body', 'banner', 'parent', 'order']
+
+    def get_banner(self, obj):
+        return get_object(obj.banner)
 
 class ProgramByAuthSerializer(serializers.ModelSerializer):
     banner = serializers.SerializerMethodField()
