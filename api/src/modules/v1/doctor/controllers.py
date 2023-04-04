@@ -49,6 +49,8 @@ def create(request):
                 'specialist' : validated_payload.get('specialist'),
                 'about' : validated_payload.get('about'),
                 'rate' : validated_payload.get('rate'),
+                'domicile' : validated_payload.get('domicile'),
+                'phone_number' : validated_payload.get('phone_number'),
             }
             Doctor(**doctor_payload).save()
 
