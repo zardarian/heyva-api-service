@@ -4,12 +4,14 @@ from src.modules.v1.dictionary.queries import dictionary_by_id
 from src.modules.v1.article.queries import article_by_id
 from src.modules.v1.video_content.queries import video_content_by_id
 from src.modules.v1.program.queries import program_by_id
+from src.modules.v1.dictionary.serializers import DictionaryRelationSerializer
 from src.modules.v1.article.serializers import PreviewArticleSerializer, ArticleSerializer
 from src.modules.v1.video_content.serializers import PreviewVideoContentSerializer, VideoContentSerializer
 from src.modules.v1.program.serializers import PreviewProgramSerializer, ProgramSerializer
 from .models import Content
 
 class ContentSerializer(serializers.ModelSerializer):
+    content_type = DictionaryRelationSerializer()
     contents = serializers.SerializerMethodField()
 
     class Meta:
@@ -28,6 +30,7 @@ class ContentSerializer(serializers.ModelSerializer):
             return ProgramSerializer(content).data
 
 class PreviewContentSerializer(serializers.ModelSerializer):
+    content_type = DictionaryRelationSerializer()
     contents = serializers.SerializerMethodField()
 
     class Meta:
