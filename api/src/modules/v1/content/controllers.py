@@ -12,7 +12,7 @@ from src.modules.v1.dictionary.queries import dictionary_by_id
 from src.modules.v1.article_attachment.queries import article_attachment_by_multiple_id
 from .queries import content_active, content_by_id
 from .models import Content
-from .serializers import ReadListContentSerializer, ContentSerializer
+from .serializers import ReadListContentSerializer, ContentSerializer, PreviewContentSerializer
 import uuid
 import sys
 
@@ -29,7 +29,7 @@ def read_list(request):
         paginator = CustomPageNumberPagination()
         content = content_active(validated_payload.get('search'), validated_payload.get('tag'))
         result_page = paginator.paginate_queryset(content, request)
-        serializer = ContentSerializer(result_page, many=True)
+        serializer = PreviewContentSerializer(result_page, many=True)
 
         return paginator.get_paginated_response(success=RESPONSE_SUCCESS, data=serializer.data, message=None, error=None, status_code=200)
     except Exception as e:
