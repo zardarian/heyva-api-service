@@ -42,3 +42,10 @@ def content_active(search, tag):
         )
     
     return content.distinct('content_reference_id', 'created_at').order_by('-created_at')
+
+def content_by_id(id):
+    return Content.objects.filter(
+        content_reference_id=id,
+        is_active=True,
+        deleted_at__isnull=True
+    )

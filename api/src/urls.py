@@ -105,4 +105,5 @@ urlpatterns = [
 
     # Content
     path("{}/{}/content/list".format(api, version), content_controller.read_list),
+    path("{}/{}/content/<id>".format(api, version), content_controller.read_by_id),
 ]
