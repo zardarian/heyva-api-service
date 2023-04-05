@@ -18,13 +18,22 @@ USER_DOES_NOT_EXISTS = "User Does Not Exists"
 USER_VERIFICATION_SUCCESS = "Successfully verify user account"
 PASSWORD_DOES_NOT_MATCH = "Password Does Not Match"
 CONFIRM_PASSWORD_DOES_NOT_MATCH = "Confirm Password Does Not Match"
+PASSWORD_CANNOT_BE_THE_SAME_AS_PREVIOUS_PASSWORD = "Password cannot be the same as previous password"
 AUTHENTICATION_FAILED = "Authentication Failed"
 
+PAYLOAD_CANNOT_BE_EMPTY = "Payload cannot be empty"
 OBJECTS_NOT_FOUND = "Objects Not Found"
 SUCCESSFULLY_INSERT = "Successfully Insert"
 FAILED_INSERT = "Failed to Insert"
 SUCCESSFULLY_UPDATE = "Successfully Update"
 FAILED_UPDATE = "Failed to Update"
+
+# JWT
+JWT_ACCESS = "ACCESS"
+JWT_REFRESH = "REFRESH"
+JWT_REGISTRATION = "REGISTRATION"
+JWT_REQUEST_RESET_PASSWORD = "REQUEST_RESET_PASSWORD"
+JWT_INVALID_SCOPE = "Invalid Scope"
 
 # Objects
 GENDER_MALE = '84815f1a-0cdb-4686-b312-e38ee1d9b7fb'

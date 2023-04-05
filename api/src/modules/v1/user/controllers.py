@@ -4,8 +4,8 @@ from django.contrib.auth.hashers import make_password, check_password
 from rest_framework import exceptions
 from rest_framework.decorators import api_view, authentication_classes
 from django.template.loader import render_to_string
-from src.helpers import output_response, generate_registration_url, encrypt, decrypt
-from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, USER_ALREADY_EXISTS, USER_DOES_NOT_EXISTS, PASSWORD_DOES_NOT_MATCH, MULTIPLE_ROWS_RETURNED, AUTHENTICATION_FAILED, GENDER_FEMALE, ROLE_USER, USER_VERIFICATION_SUCCESS, CONFIRM_PASSWORD_DOES_NOT_MATCH
+from src.helpers import output_response, generate_registration_url, generate_request_reset_password_url, encrypt, decrypt
+from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, USER_ALREADY_EXISTS, USER_DOES_NOT_EXISTS, PASSWORD_DOES_NOT_MATCH, MULTIPLE_ROWS_RETURNED, AUTHENTICATION_FAILED, GENDER_FEMALE, ROLE_USER, USER_VERIFICATION_SUCCESS, CONFIRM_PASSWORD_DOES_NOT_MATCH, PAYLOAD_CANNOT_BE_EMPTY, PASSWORD_CANNOT_BE_THE_SAME_AS_PREVIOUS_PASSWORD
 from src.authentications.basic_auth import CustomBasicAuthentication
 from src.authentications.jwt_auth import CustomJWTAuthentication
 from src.mails.services import send_email
@@ -17,7 +17,7 @@ from src.modules.v1.dictionary.queries import dictionary_by_id
 from src.modules.v1.user.queries import user_by_id
 from src.modules.v1.profile.queries import get_latest_profile_id_today, profile_by_code, profile_by_user_id
 from datetime import datetime
-from .serializers import RegisterSerializer, LoginSerializer, LoginResponseSerializer, UserSerializer, RefreshTokenSerializer, ChangePasswordSerializer
+from .serializers import RegisterSerializer, LoginSerializer, LoginResponseSerializer, UserSerializer, RefreshTokenSerializer, ChangePasswordSerializer, RequestResetPasswordSerializer, ResetPasswordSerializer
 from .models import User
 from .queries import user_registered, user_registered_not_verified, user_exists, user_by_id, user_exists_verified
 from django.shortcuts import render
@@ -121,10 +121,10 @@ def register(request):
             registration_token = CustomJWTAuthentication.create_registration_token(user_payload)
             if validated_payload.get('email'):
                 message = render_to_string('user_registration.html', {
-                    'page_title': 'Account Verification',
+                    'page_title': 'Registration',
                     'application_url': settings.APPLICATION_URL,
                     'company_logo': settings.COMPANY_LOGO,
-                    'header': 'Account Verification',
+                    'header': 'Registration',
                     'username': user_identifier,
                     'body': 'Hello, We have received your application for registration, click the button below to verify your account.',
                     'verification_link': generate_registration_url(registration_token, user_uuid),
@@ -238,9 +238,8 @@ def refresh_token(request):
             return output_response(success=RESPONSE_FAILED, data=None, message=USER_DOES_NOT_EXISTS, error=None, status_code=404)
         
         validate_refresh_token = CustomJWTAuthentication.validate_refresh_token(validated_payload.get('refresh_token'), validated_payload.get('id'))
-        
         if not validate_refresh_token[0]:
-            return output_response(success=RESPONSE_FAILED, data=None, message=validate_refresh_token[1], error=None, status_code=404)
+            return output_response(success=RESPONSE_FAILED, data=None, message=validate_refresh_token[1], error=None, status_code=400)
 
         user = user.values().first()
         access_token = CustomJWTAuthentication.create_access_token(user)
@@ -303,6 +302,87 @@ def change_password(request):
         password_match = check_password(validated_payload.get('old_password'), legacy.get('password'))
         if not password_match:
             return output_response(success=RESPONSE_FAILED, data=None, message=PASSWORD_DOES_NOT_MATCH, error=None, status_code=401)
+        
+        if validated_payload.get('new_password') != validated_payload.get('confirm_new_password'):
+            return output_response(success=RESPONSE_FAILED, data=None, message=CONFIRM_PASSWORD_DOES_NOT_MATCH, error=None, status_code=401)
+        
+        user.update(
+            updated_at=datetime.now(),
+            updated_by=request.user.get('id'),
+            password=make_password(validated_payload.get('new_password'))
+        )
+
+        return output_response(success=RESPONSE_SUCCESS, data={'id': legacy.get('id')}, message=None, error=None, status_code=200)
+    except Exception as e:
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        error_message = "{}:{}".format(filename, line_number)
+        return output_response(success=RESPONSE_ERROR, data=None, message=error_message, error=str(e), status_code=500)
+
+@api_view(['POST'])
+@authentication_classes([CustomBasicAuthentication])
+def request_reset_password(request):
+    try:
+        payload = RequestResetPasswordSerializer(data=request.data)
+        if not payload.is_valid():
+            return output_response(success=RESPONSE_FAILED, data=None, message=None, error=payload.errors, status_code=400)
+        
+        validated_payload = payload.validated_data
+        if not validated_payload.get('email') and not validated_payload.get('phone_number'):
+            return output_response(success=RESPONSE_FAILED, data=None, message=PAYLOAD_CANNOT_BE_EMPTY, error=None, status_code=400)
+
+        user = user_exists(username=None, email=validated_payload.get('email'), phone_number=validated_payload.get('phone_number'))
+        if not user:
+            return output_response(success=RESPONSE_FAILED, data=None, message=USER_DOES_NOT_EXISTS, error=None, status_code=404)
+
+        user = user.values().first()
+        request_reset_password_token = CustomJWTAuthentication.create_request_reset_password_token(user)
+        if validated_payload.get('email'):
+            message = render_to_string('request_reset_password.html', {
+                'page_title': 'Request Reset Password',
+                'application_url': settings.APPLICATION_URL,
+                'company_logo': settings.COMPANY_LOGO,
+                'header': 'Request Reset Password',
+                'username': validated_payload.get('email'),
+                'body': 'Hello, We have received your request to reset password, click the button below to reset your password.',
+                'verification_link': generate_request_reset_password_url(request_reset_password_token, user.get('id')),
+                'button_name': 'Reset Password',
+                'hardcode_message': 'If you experience problems when clicking the "Reset Password" button, click the URL link below:',
+                'notes': 'Note: This message was sent from an email address that is not monitored. Do not reply to this message. If you have any questions please contact us at',
+                'helper_mail': settings.COMPANY_HELPER_MAIL,
+            })
+            send_email('Reset Password', message, [validated_payload.get('email')], html_message=message)
+
+        return output_response(success=RESPONSE_SUCCESS, data={'id': user.get('id')}, message=None, error=None, status_code=200)
+    except Exception as e:
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        error_message = "{}:{}".format(filename, line_number)
+        return output_response(success=RESPONSE_ERROR, data=None, message=error_message, error=str(e), status_code=500)
+    
+@api_view(['PUT'])
+@authentication_classes([CustomBasicAuthentication])
+def reset_password(request, id, reset_password_token):
+    payload = ResetPasswordSerializer(data=request.data)
+    if not payload.is_valid():
+        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=payload.errors, status_code=400)
+    
+    validated_payload = payload.validated_data
+    try:
+        user = user_by_id(id)
+        if not user:
+            return output_response(success=RESPONSE_FAILED, data=None, message=USER_DOES_NOT_EXISTS, error=None, status_code=404)
+
+        validate_request_reset_password_token = CustomJWTAuthentication.validate_request_reset_password_token(reset_password_token, id)
+        if validate_request_reset_password_token[0] == False:
+            return output_response(success=RESPONSE_FAILED, data=None, message=validate_request_reset_password_token[1], error=None, status_code=401)
+        
+        legacy = user.values().first()
+        password_match = check_password(validated_payload.get('new_password'), legacy.get('password'))
+        if password_match:
+            return output_response(success=RESPONSE_FAILED, data=None, message=PASSWORD_CANNOT_BE_THE_SAME_AS_PREVIOUS_PASSWORD, error=None, status_code=401)
         
         if validated_payload.get('new_password') != validated_payload.get('confirm_new_password'):
             return output_response(success=RESPONSE_FAILED, data=None, message=CONFIRM_PASSWORD_DOES_NOT_MATCH, error=None, status_code=401)

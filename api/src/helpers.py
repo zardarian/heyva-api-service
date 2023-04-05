@@ -26,6 +26,9 @@ def output_json(success=None, data=None, message=None, error=None):
 def generate_registration_url(token,  user_id):
     return "{}/{}/{}/{}/{}/{}/{}".format(settings.BASE_URL, 'api', 'v1', 'users', 'verification', user_id, token)
 
+def generate_request_reset_password_url(token, user_id):
+    return "{}/{}/{}/{}/{}/{}/{}".format(settings.BASE_URL, 'api', 'v1', 'users', 'request-reset-password', user_id, token)
+
 def encrypt(txt):
     try:
         if not txt:

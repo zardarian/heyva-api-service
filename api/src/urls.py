@@ -34,6 +34,8 @@ urlpatterns = [
     path("{}/{}/users/refresh-token".format(api, version), user_controller.refresh_token),
     path("{}/{}/users".format(api, version), user_controller.get_user),
     path("{}/{}/users/change-password".format(api, version), user_controller.change_password),
+    path("{}/{}/users/request-reset-password".format(api, version), user_controller.request_reset_password),
+    path("{}/{}/users/reset-password/<id>/<reset_password_token>".format(api, version), user_controller.reset_password),
 
     # Dictionary
     path("{}/{}/dictionary/create".format(api, version), dictionary_controller.create),

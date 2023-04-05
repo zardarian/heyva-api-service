@@ -7,7 +7,7 @@ from src.modules.v1.role.queries import role_by_user_id
 from src.modules.v1.profile.queries import profile_by_user_id
 from src.modules.v1.user.serializers import AuthenticateSerializer
 from src.helpers import output_json
-from src.constants import RESPONSE_FAILED, AUTHORIZATION_HEADER_DOES_NOT_EXISTS, INVALID_SIGNATURE, EXPIRED_SIGNATURE, USER_IDENTIFIER_NOT_FOUND_IN_JWT, USER_NOT_FOUND, AUTHORIZATION_PARSE_ERROR, USER_DOES_NOT_MATCH
+from src.constants import RESPONSE_FAILED, AUTHORIZATION_HEADER_DOES_NOT_EXISTS, INVALID_SIGNATURE, EXPIRED_SIGNATURE, USER_IDENTIFIER_NOT_FOUND_IN_JWT, USER_NOT_FOUND, AUTHORIZATION_PARSE_ERROR, USER_DOES_NOT_MATCH, JWT_ACCESS, JWT_REFRESH, JWT_REGISTRATION, JWT_REQUEST_RESET_PASSWORD, JWT_INVALID_SCOPE
 import jwt
 
 class CustomJWTAuthentication(authentication.BaseAuthentication):
@@ -39,6 +39,10 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
             output = output_json(success=RESPONSE_FAILED, data=None, message=USER_NOT_FOUND, error=None)
             raise AuthenticationFailed(output)
         
+        if payload.get('scope') != JWT_ACCESS:
+            output = output_json(success=RESPONSE_FAILED, data=None, message=JWT_INVALID_SCOPE, error=None)
+            return AuthenticationFailed(output)
+        
         serialized_user = AuthenticateSerializer(
             {
                 'id': user.id,
@@ -66,6 +70,7 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
             'user_identifier': user.get('id'),
             'exp': int((datetime.now() + timedelta(hours=settings.JWT_CONFIG['ACCESS_TOKEN_LIFETIME'])).timestamp()),
             'iat': datetime.now().timestamp(),
+            'scope': JWT_ACCESS,
             'username': user.get('username'),
             'email': user.get('email'),
             'phone_number': user.get('phone_number'),
@@ -82,8 +87,9 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
         roles = role_by_user_id(user.get('id')).values_list('role', flat=True)
         payload = {
             'user_identifier': user.get('id'),
-            'exp': int((datetime.now() + timedelta(days=settings.JWT_CONFIG['REFRESH_TOKEN_LIFETIME'])).timestamp()),
+            'exp': int((datetime.now() + timedelta(hours=settings.JWT_CONFIG['REFRESH_TOKEN_LIFETIME'])).timestamp()),
             'iat': datetime.now().timestamp(),
+            'scope': JWT_REFRESH,
             'username': user.get('username'),
             'email': user.get('email'),
             'phone_number': user.get('phone_number'),
@@ -100,6 +106,23 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
             'user_identifier': user.get('id'),
             'exp': int((datetime.now() + timedelta(minutes=settings.JWT_CONFIG['REGISTRATION_TOKEN_LIFETIME'])).timestamp()),
             'iat': datetime.now().timestamp(),
+            'scope': JWT_REGISTRATION,
+            'username': user.get('username'),
+            'email': user.get('email'),
+            'phone_number': user.get('phone_number')
+        }
+
+        jwt_token = jwt.encode(payload, settings.JWT_CONFIG['SIGNING_KEY'], algorithm=settings.JWT_CONFIG['ALGORITHM'])
+
+        return jwt_token
+    
+    @classmethod
+    def create_request_reset_password_token(cls, user):
+        payload = {
+            'user_identifier': user.get('id'),
+            'exp': int((datetime.now() + timedelta(minutes=settings.JWT_CONFIG['REQUEST_RESET_PASSWORD_TOKEN_LIFETIME'])).timestamp()),
+            'iat': datetime.now().timestamp(),
+            'scope': JWT_REQUEST_RESET_PASSWORD,
             'username': user.get('username'),
             'email': user.get('email'),
             'phone_number': user.get('phone_number')
@@ -126,6 +149,9 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
 
         if user_identifier != user_id:
             return False, USER_DOES_NOT_MATCH
+        
+        if payload.get('scope') != JWT_REFRESH:
+            return False, JWT_INVALID_SCOPE
 
         return True, user_id
     
@@ -146,6 +172,32 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
 
         if user_identifier != user_id:
             return False, USER_DOES_NOT_MATCH
+        
+        if payload.get('scope') != JWT_REGISTRATION:
+            return False, JWT_INVALID_SCOPE
+
+        return True, user_id
+    
+    @classmethod
+    def validate_request_reset_password_token(cls, request_reset_password_token, user_id):
+        try:
+            payload = jwt.decode(request_reset_password_token, settings.JWT_CONFIG['SIGNING_KEY'], algorithms=[settings.JWT_CONFIG['ALGORITHM']])
+        except jwt.exceptions.InvalidSignatureError:
+            return False, INVALID_SIGNATURE
+        except jwt.exceptions.ExpiredSignatureError:
+            return False, EXPIRED_SIGNATURE
+        except:
+            return False, AUTHORIZATION_PARSE_ERROR
+
+        user_identifier = payload.get('user_identifier')
+        if user_identifier is None:
+            return False, USER_IDENTIFIER_NOT_FOUND_IN_JWT
+
+        if user_identifier != user_id:
+            return False, USER_DOES_NOT_MATCH
+        
+        if payload.get('scope') != JWT_REQUEST_RESET_PASSWORD:
+            return False, JWT_INVALID_SCOPE
 
         return True, user_id
 
