@@ -14,6 +14,7 @@ class Program(models.Model):
     banner = models.TextField(blank=True, null=True)
     parent = models.ForeignKey('self', models.DO_NOTHING, db_column='parent', blank=True, null=True)
     order = models.BigIntegerField(blank=True, null=True)
+    thumbnail = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False

@@ -15,13 +15,17 @@ class ProgramSerializer(serializers.ModelSerializer):
     child = serializers.SerializerMethodField()
     program_detail = serializers.SerializerMethodField()
     days_count = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = Program
-        fields = ['id', 'title', 'body', 'banner', 'parent', 'order', 'tags', 'child', 'program_detail', 'days_count']
+        fields = ['id', 'title', 'body', 'banner', 'parent', 'order', 'thumbnail', 'tags', 'child', 'program_detail', 'days_count']
 
     def get_banner(self, obj):
         return get_object(obj.banner)
+    
+    def get_thumbnail(self, obj):
+        return get_object(obj.thumbnail)
     
     def get_tags(self, obj):
         tags = program_tag_by_program_id(obj.id)
@@ -40,16 +44,21 @@ class ProgramSerializer(serializers.ModelSerializer):
     
 class PreviewProgramSerializer(serializers.ModelSerializer):
     banner = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = Program
-        fields = ['id', 'title', 'body', 'banner', 'parent', 'order']
+        fields = ['id', 'title', 'body', 'banner', 'thumbnail', 'parent', 'order']
 
     def get_banner(self, obj):
         return get_object(obj.banner)
+    
+    def get_thumbnail(self, obj):
+        return get_object(obj.thumbnail)
 
 class ProgramByAuthSerializer(serializers.ModelSerializer):
     banner = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
     child = serializers.SerializerMethodField()
     program_detail = serializers.SerializerMethodField()
@@ -57,10 +66,13 @@ class ProgramByAuthSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Program
-        fields = ['id', 'title', 'body', 'banner', 'parent', 'order', 'tags', 'child', 'program_detail', 'days_count']
+        fields = ['id', 'title', 'body', 'banner', 'parent', 'order', 'thumbnail', 'tags', 'child', 'program_detail', 'days_count']
 
     def get_banner(self, obj):
         return get_object(obj.banner)
+    
+    def get_thumbnail(self, obj):
+        return get_object(obj.thumbnail)
     
     def get_tags(self, obj):
         tags = program_tag_by_program_id(obj.id)
@@ -89,14 +101,18 @@ class ProgramByAuthSerializer(serializers.ModelSerializer):
     
 class ChildProgramSerializer(serializers.ModelSerializer):
     banner = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
     program_detail = serializers.SerializerMethodField()
 
     class Meta:
         model = Program
-        fields = ['id', 'title', 'body', 'banner', 'order', 'program_detail']
+        fields = ['id', 'title', 'body', 'banner', 'thumbnail', 'order', 'program_detail']
 
     def get_banner(self, obj):
         return get_object(obj.banner)
+
+    def get_thumbnail(self, obj):
+        return get_object(obj.thumbnail)
     
     def get_program_detail(self, obj):
         program_detail = program_detail_by_program_id(obj.id)
@@ -106,6 +122,7 @@ class CreateProgramSerializer(serializers.Serializer):
     title = serializers.CharField(required=True)
     body = serializers.CharField(required=True)
     banner = serializers.FileField(required=False)
+    thumbnail = serializers.FileField(required=False)
     parent = serializers.CharField(required=False)
     order = serializers.IntegerField(required=False)
     tag = serializers.ListField(required=True)

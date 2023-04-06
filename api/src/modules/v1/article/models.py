@@ -11,6 +11,9 @@ class Article(models.Model):
     is_active = models.BooleanField(blank=True, null=True)
     title = models.TextField(blank=True, null=True)
     body = models.TextField(blank=True, null=True)
+    creator = models.TextField(blank=True, null=True)
+    banner = models.TextField(blank=True, null=True)
+    thumbnail = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False

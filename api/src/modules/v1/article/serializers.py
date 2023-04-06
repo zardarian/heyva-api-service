@@ -8,10 +8,12 @@ from .models import Article
 class ArticleSerializer(serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
     rendered_body = serializers.SerializerMethodField()
+    banner = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
-        fields = ['id', 'title', 'tags', 'rendered_body']
+        fields = ['id', 'title', 'tags', 'rendered_body', 'creator', 'banner', 'thumbnail']
 
     def get_rendered_body(self, obj):
         rendered_body = obj.body
@@ -26,12 +28,20 @@ class ArticleSerializer(serializers.ModelSerializer):
         tags = article_tag_by_article_id(obj.id)
         return ArticleTagRelationSerializer(tags, many=True).data
     
+    def get_banner(self, obj):
+        return get_object(obj.banner)
+    
+    def get_thumbnail(self, obj):
+        return get_object(obj.thumbnail)
+    
 class PreviewArticleSerializer(serializers.ModelSerializer):
     rendered_body = serializers.SerializerMethodField()
+    banner = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
-        fields = ['id', 'title', 'rendered_body']
+        fields = ['id', 'title', 'rendered_body', 'creator', 'banner', 'thumbnail']
 
     def get_rendered_body(self, obj):
         rendered_body = obj.body
@@ -41,10 +51,19 @@ class PreviewArticleSerializer(serializers.ModelSerializer):
             rendered_body = rendered_body.replace(article_attachment.id, get_object(article_attachment.attachment))
         
         return rendered_body
+    
+    def get_banner(self, obj):
+        return get_object(obj.banner)
+    
+    def get_thumbnail(self, obj):
+        return get_object(obj.thumbnail)
 
 class CreateArticleSerializer(serializers.Serializer):
     title = serializers.CharField(required=True)
     body = serializers.CharField(required=True)
+    creator = serializers.CharField(required=True)
+    banner = serializers.FileField(required=True)
+    thumbnail = serializers.FileField(required=True)
     tag = serializers.ListField(required=True)
     attachment = serializers.ListField(required=False, child=serializers.CharField(required=False))
 

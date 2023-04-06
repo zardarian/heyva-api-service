@@ -1,12 +1,14 @@
 from django.db import transaction
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from src.storages.services import put_object, remove_object
 from src.paginations.page_number_pagination import CustomPageNumberPagination
 from src.helpers import output_response
-from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJECTS_NOT_FOUND
+from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJECTS_NOT_FOUND, CONTENT_ARTICLE
 from src.authentications.basic_auth import CustomBasicAuthentication
 from src.authentications.jwt_auth import CustomJWTAuthentication
 from src.permissions.admin_permission import IsAdmin
 from src.modules.v1.article_tag.models import ArticleTag
+from src.modules.v1.content.models import Content
 from src.modules.v1.dictionary.queries import dictionary_by_id
 from src.modules.v1.article_attachment.queries import article_attachment_by_multiple_id
 from datetime import datetime
@@ -27,17 +29,34 @@ def create(request):
     validated_payload = payload.validated_data
     try:
         article_uuid = uuid.uuid4()
+        content_uuid = uuid.uuid4()
 
         with transaction.atomic():
+            banner = put_object('article/banner', validated_payload.get('banner'))
+            thumbnail = put_object('article/thumbnail', validated_payload.get('thumbnail'))
+
             article_payload = {
-                'id' : str(article_uuid),
+                'id' : article_uuid,
                 'created_at' : datetime.now(),
                 'created_by' : request.user.get('id'),
                 'is_active' : True,
                 'title' : validated_payload.get('title'),
                 'body' : validated_payload.get('body'),
+                'creator' : validated_payload.get('creator'),
+                'banner' : banner,
+                'thumbnail' : thumbnail,
             }
             Article(**article_payload).save()
+
+            content_payload = {
+                'id' : content_uuid,
+                'created_at' : datetime.now(),
+                'created_by' : request.user.get('id'),
+                'is_active' : True,
+                'content_reference_id' : article_uuid,
+                'content_type' : dictionary_by_id(CONTENT_ARTICLE).first(),
+            }
+            Content(**content_payload).save()
 
             tag_payload = []
             for tag in validated_payload.get('tag'):
@@ -60,6 +79,9 @@ def create(request):
         
         return output_response(success=RESPONSE_SUCCESS, data={'id': article_payload.get('id')}, message=None, error=None, status_code=200)
     except Exception as e:
+        remove_object(article_payload.get('banner'))
+        remove_object(article_payload.get('thumbnail'))
+
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename
         line_number = exception_traceback.tb_lineno

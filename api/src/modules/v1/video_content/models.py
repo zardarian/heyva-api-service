@@ -13,6 +13,7 @@ class VideoContent(models.Model):
     body = models.TextField(blank=True, null=True)
     creator = models.TextField(blank=True, null=True)
     banner = models.TextField(blank=True, null=True)
+    thumbnail = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False

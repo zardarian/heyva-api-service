@@ -12,10 +12,11 @@ class VideoContentSerializer(serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
     attachments = serializers.SerializerMethodField()
     banner = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = VideoContent
-        fields = ['id', 'title', 'body', 'creator', 'tags', 'attachments', 'banner']
+        fields = ['id', 'title', 'body', 'creator', 'tags', 'attachments', 'banner', 'thumbnail']
 
     def get_tags(self, obj):
         tags = video_content_tag_by_video_content_id(obj.id)
@@ -27,26 +28,34 @@ class VideoContentSerializer(serializers.ModelSerializer):
     
     def get_banner(self, obj):
         return get_object(obj.banner)
+    
+    def get_thumbnail(self, obj):
+        return get_object(obj.thumbnail)
 
 class PreviewVideoContentSerializer(serializers.ModelSerializer):
     banner = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = VideoContent
-        fields = ['id', 'title', 'body', 'creator', 'banner']
+        fields = ['id', 'title', 'body', 'creator', 'banner', 'thumbnail']
     
     def get_banner(self, obj):
         return get_object(obj.banner)
+    
+    def get_thumbnail(self, obj):
+        return get_object(obj.thumbnail)
     
 class VideoContentByAuthSerializer(serializers.ModelSerializer):
     tags = serializers.SerializerMethodField()
     attachments = serializers.SerializerMethodField()
     is_finished = serializers.SerializerMethodField()
     banner = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = VideoContent
-        fields = ['id', 'title', 'body', 'creator', 'tags', 'attachments', 'is_finished', 'banner']
+        fields = ['id', 'title', 'body', 'creator', 'tags', 'attachments', 'is_finished', 'banner', 'thumbnail']
 
     def get_tags(self, obj):
         tags = video_content_tag_by_video_content_id(obj.id)
@@ -64,6 +73,9 @@ class VideoContentByAuthSerializer(serializers.ModelSerializer):
     
     def get_banner(self, obj):
         return get_object(obj.banner)
+    
+    def get_thumbnail(self, obj):
+        return get_object(obj.thumbnail)
 
 class CreateVideoContentSerializer(serializers.Serializer):
     title = serializers.CharField(required=True)
@@ -72,6 +84,7 @@ class CreateVideoContentSerializer(serializers.Serializer):
     tag = serializers.ListField(required=True)
     attachment = serializers.ListField(required=False, child=serializers.CharField(required=False))
     banner = serializers.FileField(required=True)
+    thumbnail = serializers.FileField(required=True)
 
 class ReadVideoContentSerializer(serializers.Serializer):
     search = serializers.CharField(required=False)

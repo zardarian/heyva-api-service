@@ -3,11 +3,12 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from src.paginations.page_number_pagination import CustomPageNumberPagination
 from src.helpers import output_response
 from src.storages.services import put_object, remove_object
-from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJECTS_NOT_FOUND
+from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJECTS_NOT_FOUND, CONTENT_VIDEO
 from src.authentications.basic_auth import CustomBasicAuthentication
 from src.authentications.jwt_auth import CustomJWTAuthentication
 from src.permissions.admin_permission import IsAdmin
 from src.modules.v1.video_content_tag.models import VideoContentTag
+from src.modules.v1.content.models import Content
 from src.modules.v1.dictionary.queries import dictionary_by_id
 from src.modules.v1.video_content_attachment.queries import video_content_attachment_by_multiple_id
 from datetime import datetime
@@ -28,9 +29,11 @@ def create(request):
     validated_payload = payload.validated_data
     try:
         video_content_uuid = uuid.uuid4()
+        content_uuid = uuid.uuid4()
 
         with transaction.atomic():
-            banner_path = put_object('video-content/banner', validated_payload.get('banner'))
+            banner = put_object('video-content/banner', validated_payload.get('banner'))
+            thumbnail = put_object('video-content/thumbnail', validated_payload.get('thumbnail'))
 
             video_content_payload = {
                 'id' : video_content_uuid,
@@ -40,9 +43,20 @@ def create(request):
                 'title' : validated_payload.get('title'),
                 'body' : validated_payload.get('body'),
                 'creator': validated_payload.get('creator'),
-                'banner': banner_path
+                'banner': banner,
+                'thumbnail': thumbnail,
             }
             VideoContent(**video_content_payload).save()
+
+            content_payload = {
+                'id' : content_uuid,
+                'created_at' : datetime.now(),
+                'created_by' : request.user.get('id'),
+                'is_active' : True,
+                'content_reference_id' : video_content_uuid,
+                'content_type' : dictionary_by_id(CONTENT_VIDEO).first(),
+            }
+            Content(**content_payload).save()
 
             tag_payload = []
             for tag in validated_payload.get('tag'):
@@ -65,7 +79,8 @@ def create(request):
         
         return output_response(success=RESPONSE_SUCCESS, data={'id': video_content_payload.get('id')}, message=None, error=None, status_code=200)
     except Exception as e:
-        remove_object(validated_payload.get('banner'))
+        remove_object(video_content_payload.get('banner'))
+        remove_object(video_content_payload.get('thumbnail'))
             
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename
