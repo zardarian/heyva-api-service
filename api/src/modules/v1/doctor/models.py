@@ -17,6 +17,7 @@ class Doctor(models.Model):
     rate = models.BigIntegerField(blank=True, null=True)
     domicile = models.TextField(blank=True, null=True)
     phone_number = models.TextField(blank=True, null=True)
+    avatar = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False

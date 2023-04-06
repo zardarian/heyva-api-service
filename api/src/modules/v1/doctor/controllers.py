@@ -1,6 +1,7 @@
 from django.db import transaction
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from datetime import datetime
+from src.storages.services import put_object, remove_object
 from src.paginations.page_number_pagination import CustomPageNumberPagination
 from src.helpers import output_response
 from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJECTS_NOT_FOUND
@@ -38,6 +39,8 @@ def create(request):
             doctor_code = "{}{}{}".format("DOC-", str(today.strftime("%Y%m%d")), str(next_id).zfill(4))
 
         with transaction.atomic():
+            avatar = put_object('doctor/avatar', validated_payload.get('avatar'))
+
             doctor_payload = {
                 'id' : doctor_uuid,
                 'created_at' : datetime.now(),
@@ -51,6 +54,7 @@ def create(request):
                 'rate' : validated_payload.get('rate'),
                 'domicile' : validated_payload.get('domicile'),
                 'phone_number' : validated_payload.get('phone_number'),
+                'avatar': avatar
             }
             Doctor(**doctor_payload).save()
 
@@ -69,6 +73,8 @@ def create(request):
         
         return output_response(success=RESPONSE_SUCCESS, data={'id': doctor_payload.get('id')}, message=None, error=None, status_code=200)
     except Exception as e:
+        remove_object(doctor_payload.get('avatar'))
+        
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename
         line_number = exception_traceback.tb_lineno
