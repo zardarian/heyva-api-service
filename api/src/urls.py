@@ -8,7 +8,7 @@ from src.modules.v1.role import controllers as role_controller
 from src.modules.v1.profile import controllers as profile_controller
 from src.modules.v1.article import controllers as article_controller
 from src.modules.v1.article_attachment import controllers as article_attachment_controller
-from src.modules.v1.mood_tracker import controllers as mood_tracker_controller
+# from src.modules.v1.mood_tracker import controllers as mood_tracker_controller
 from src.modules.v1.video_content import controllers as video_content_controller
 from src.modules.v1.video_content_attachment import controllers as video_content_attachment_controller
 from src.modules.v1.video_content_personal import controllers as video_content_personal_controller
@@ -20,6 +20,8 @@ from src.modules.v1.program_personal_tracker import controllers as program_perso
 from src.modules.v1.doctor import controllers as doctor_controller
 from src.modules.v1.doctor_appointment import controllers as doctor_appointment_controller
 from src.modules.v1.content import controllers as content_controller
+from src.modules.v1.tracker_type import controllers as tracker_type_controller
+from src.modules.v1.tracker_daily import controllers as tracker_daily_controller
 
 api = 'api'
 version = 'v1'
@@ -62,9 +64,9 @@ urlpatterns = [
     path("{}/{}/article-attachment/get-unused".format(api, version), article_attachment_controller.read_unused),
 
     # Mood Tracker
-    path("{}/{}/mood-tracker/create".format(api, version), mood_tracker_controller.create),
-    path("{}/{}/mood-tracker/list".format(api, version), mood_tracker_controller.read_list),
-    path("{}/{}/mood-tracker/private-list".format(api, version), mood_tracker_controller.read_list_by_auth),
+    # path("{}/{}/mood-tracker/create".format(api, version), mood_tracker_controller.create),
+    # path("{}/{}/mood-tracker/list".format(api, version), mood_tracker_controller.read_list),
+    # path("{}/{}/mood-tracker/private-list".format(api, version), mood_tracker_controller.read_list_by_auth),
 
     # Video Content
     path("{}/{}/video-content/create".format(api, version), video_content_controller.create),
@@ -108,4 +110,11 @@ urlpatterns = [
     # Content
     path("{}/{}/content/list".format(api, version), content_controller.read_list),
     path("{}/{}/content/<id>".format(api, version), content_controller.read_by_id),
+
+    # Tracker Type
+    path("{}/{}/tracker-type/list".format(api, version), tracker_type_controller.read_list),
+
+    # Tracker Daily
+    path("{}/{}/tracker-daily/create".format(api, version), tracker_daily_controller.create),
+    path("{}/{}/tracker-daily/list".format(api, version), tracker_daily_controller.read_list),
 ]
