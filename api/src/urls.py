@@ -116,5 +116,6 @@ urlpatterns = [
 
     # Tracker Daily
     path("{}/{}/tracker-daily/create".format(api, version), tracker_daily_controller.create),
-    path("{}/{}/tracker-daily/list".format(api, version), tracker_daily_controller.read_list),
+    path("{}/{}/tracker-daily/insight".format(api, version), tracker_daily_controller.insight),
+    path("{}/{}/tracker-daily/recommendation".format(api, version), tracker_daily_controller.recommendation)
 ]

@@ -15,7 +15,9 @@ class TrackerDailySerializer(serializers.ModelSerializer):
         for resp in obj.response:
             tracker_detail = tracker_detail_by_id(resp.get('tracker_detail_id')).first()
             tracker_detail_serializer = TrackerDetailTitleSerializer(tracker_detail).data
-            answer = tracker_detail.json_content.get(resp.get('answer'))
+            answer = list(filter(lambda item: item['id'] == resp.get('answer'), tracker_detail.json_content))
+            if answer:
+                answer = answer[0]
             
             response.append({'tracker_detail': tracker_detail_serializer, 'answer': answer})
 
@@ -25,6 +27,9 @@ class CreateTrackerDailySerializer(serializers.Serializer):
     type = serializers.CharField(required=True)
     response = serializers.JSONField(required=True)
 
-class ReadListSerializer(serializers.Serializer):
+class InsightSerializer(serializers.Serializer):
     type = serializers.CharField(required=False)
+    date = serializers.DateField(required=True)
+
+class RecommendationSerializer(serializers.Serializer):
     date = serializers.DateField(required=True)

@@ -28,6 +28,8 @@ FAILED_INSERT = "Failed to Insert"
 SUCCESSFULLY_UPDATE = "Successfully Update"
 FAILED_UPDATE = "Failed to Update"
 
+EMPTY_DATA = "Empty data"
+
 # JWT
 JWT_ACCESS = "ACCESS"
 JWT_REFRESH = "REFRESH"
