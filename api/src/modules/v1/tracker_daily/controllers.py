@@ -29,8 +29,6 @@ def create(request):
     
     validated_payload = payload.validated_data
     try:
-        tracker_daily_uuid = uuid.uuid4()
-
         with transaction.atomic():
             profile = profile_by_user_id(request.user.get('id')).first()
             tracker_daily = tracker_daily_today_by_profile_code(profile.code)
@@ -38,17 +36,22 @@ def create(request):
             if tracker_daily:
                 tracker_daily.delete()
 
-            tracker_daily_payload = {
-                'id' : tracker_daily_uuid,
-                'created_at' : datetime.now(),
-                'created_by' : request.user.get('id'),
-                'profile_code' : profile,
-                'type' : tracker_type_by_id(validated_payload.get('type')).first(),
-                'response' : validated_payload.get('response'),
-            }
-            TrackerDaily(**tracker_daily_payload).save()
+            tracker_daily_payload = []
+            for payload in validated_payload.get('data'):
+                tracker_daily_uuid = uuid.uuid4()
 
-        return output_response(success=RESPONSE_SUCCESS, data={'id': tracker_daily_payload.get('id')}, message=None, error=None, status_code=200)
+                payload = TrackerDaily(
+                    id = tracker_daily_uuid,
+                    created_at = datetime.now(),
+                    created_by = request.user.get('id'),
+                    profile_code = profile,
+                    type = tracker_type_by_id(payload.get('type')).first(),
+                    response = payload.get('response')
+                )
+                tracker_daily_payload.append(payload)
+            TrackerDaily.objects.bulk_create(tracker_daily_payload)
+
+        return output_response(success=RESPONSE_SUCCESS, data=None, message=None, error=None, status_code=200)
     except Exception as e:
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename
@@ -93,7 +96,9 @@ def recommendation(request):
         tags = []
         for data in tracker_daily_serializer:
             for response in data.get('response'):
-                tags = list(set(tags).union(set(response.get('answer').get('related_tag'))))
+                for answer in response.get('answer'):
+                    if answer.get('related_tag'):
+                        tags = list(set(tags).union(set(answer.get('related_tag'))))
 
         if not tags:
             return output_response(success=RESPONSE_FAILED, data=None, message=EMPTY_DATA, error=None, status_code=400)

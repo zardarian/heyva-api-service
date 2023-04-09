@@ -22,6 +22,7 @@ from src.modules.v1.doctor_appointment import controllers as doctor_appointment_
 from src.modules.v1.content import controllers as content_controller
 from src.modules.v1.tracker_type import controllers as tracker_type_controller
 from src.modules.v1.tracker_daily import controllers as tracker_daily_controller
+from src.modules.v1.bookmark import controllers as bookmark_controller
 
 api = 'api'
 version = 'v1'
@@ -117,5 +118,9 @@ urlpatterns = [
     # Tracker Daily
     path("{}/{}/tracker-daily/create".format(api, version), tracker_daily_controller.create),
     path("{}/{}/tracker-daily/insight".format(api, version), tracker_daily_controller.insight),
-    path("{}/{}/tracker-daily/recommendation".format(api, version), tracker_daily_controller.recommendation)
+    path("{}/{}/tracker-daily/recommendation".format(api, version), tracker_daily_controller.recommendation),
+
+    # Bookmark
+    path("{}/{}/bookmark/create".format(api, version), bookmark_controller.create),
+    path("{}/{}/bookmark/list".format(api, version), bookmark_controller.read_list)
 ]
