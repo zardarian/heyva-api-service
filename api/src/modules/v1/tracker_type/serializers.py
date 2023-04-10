@@ -13,6 +13,12 @@ class TrackerTypeSerializer(serializers.ModelSerializer):
     def get_tracker_detail(self, obj):
         tracker_detail = tracker_detail_by_tracker_type_id(obj.id)
         return TrackerDetailRelationSerializer(tracker_detail, many=True).data
+    
+class TrackerTypeRelationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TrackerType
+        fields = ['id', 'type', 'title', 'description']
 
 class ReadTrackerTypeSerializer(serializers.Serializer):
     type = serializers.CharField(required=True)

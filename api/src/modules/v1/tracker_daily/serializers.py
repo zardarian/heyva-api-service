@@ -1,10 +1,12 @@
 from rest_framework import serializers
 from src.modules.v1.tracker_detail.queries import tracker_detail_by_id
 from src.modules.v1.tracker_detail.serializers import TrackerDetailTitleSerializer
+from src.modules.v1.tracker_type.serializers import TrackerTypeRelationSerializer
 from .models import TrackerDaily
 
 class TrackerDailySerializer(serializers.ModelSerializer):
     response = serializers.SerializerMethodField()
+    type = TrackerTypeRelationSerializer()
 
     class Meta:
         model = TrackerDaily
@@ -30,7 +32,7 @@ class CreateTrackerDailySerializer(serializers.Serializer):
 
 class InsightSerializer(serializers.Serializer):
     type = serializers.CharField(required=False)
-    date = serializers.DateField(required=True)
+    date = serializers.ListField(required=True, child=serializers.DateField())
 
 class RecommendationSerializer(serializers.Serializer):
     date = serializers.DateField(required=True)

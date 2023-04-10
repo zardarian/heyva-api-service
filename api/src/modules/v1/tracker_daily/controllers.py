@@ -69,10 +69,17 @@ def insight(request):
         
         validated_payload = payload.validated_data
 
-        tracker_daily = tracker_daily_insight(request.user.get('profile_code'), validated_payload.get('type'), validated_payload.get('date'))
-        serializer = TrackerDailySerializer(tracker_daily, many=True).data
+        insight = []
+        for date_param in validated_payload.get('date'):
+            tracker_daily = tracker_daily_insight(request.user.get('profile_code'), validated_payload.get('type'), date_param)
+            tracker_daily_serializer = TrackerDailySerializer(tracker_daily, many=True).data
 
-        return output_response(success=RESPONSE_SUCCESS, data=serializer, message=None, error=None, status_code=200)
+            insight.append({
+                'insight_date': date_param,
+                'insight': tracker_daily_serializer
+            })
+
+        return output_response(success=RESPONSE_SUCCESS, data=insight, message=None, error=None, status_code=200)
     except Exception as e:
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename
