@@ -3,8 +3,10 @@ from src.storages.services import get_object
 from src.modules.v1.dictionary.serializers import DictionarySerializer
 from src.modules.v1.pregnancy.serializers import PregnancyRelationSerializer
 from src.modules.v1.interest.serializers import InterestRelationSerializer
+from src.modules.v1.user.serializers import UserRelationSerializer
 from src.modules.v1.pregnancy.queries import pregnancy_by_profile_code
 from src.modules.v1.interest.queries import interests_by_profile_code
+from src.modules.v1.user.queries import user_by_id
 from .models import Profile
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -12,9 +14,10 @@ class ProfileSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField()
     pregnancy = serializers.SerializerMethodField()
     interests = serializers.SerializerMethodField()
+    user = UserRelationSerializer()
     class Meta:
         model = Profile
-        fields = ['id', 'code', 'full_name', 'name_alias', 'birth_date', 'gender', 'avatar', 'slug_name', 'about_me', 'pregnancy', 'interests']
+        fields = ['id', 'code', 'full_name', 'name_alias', 'birth_date', 'gender', 'avatar', 'slug_name', 'about_me', 'pregnancy', 'interests', 'user']
 
     def get_avatar(self, obj):
         return get_object(obj.avatar, 3600)
