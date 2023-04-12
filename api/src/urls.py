@@ -8,7 +8,6 @@ from src.modules.v1.role import controllers as role_controller
 from src.modules.v1.profile import controllers as profile_controller
 from src.modules.v1.article import controllers as article_controller
 from src.modules.v1.article_attachment import controllers as article_attachment_controller
-# from src.modules.v1.mood_tracker import controllers as mood_tracker_controller
 from src.modules.v1.video_content import controllers as video_content_controller
 from src.modules.v1.video_content_attachment import controllers as video_content_attachment_controller
 from src.modules.v1.video_content_personal import controllers as video_content_personal_controller
@@ -24,6 +23,7 @@ from src.modules.v1.tracker_type import controllers as tracker_type_controller
 from src.modules.v1.tracker_daily import controllers as tracker_daily_controller
 from src.modules.v1.bookmark import controllers as bookmark_controller
 from src.modules.v1.terms_privacy import controllers as terms_privacy_controller
+from src.modules.v1.terms_privacy_personal import controllers as terms_privacy_personal_controller
 
 api = 'api'
 version = 'v1'
@@ -64,11 +64,6 @@ urlpatterns = [
     # Article Attachment
     path("{}/{}/article-attachment/create".format(api, version), article_attachment_controller.create),
     path("{}/{}/article-attachment/get-unused".format(api, version), article_attachment_controller.read_unused),
-
-    # Mood Tracker
-    # path("{}/{}/mood-tracker/create".format(api, version), mood_tracker_controller.create),
-    # path("{}/{}/mood-tracker/list".format(api, version), mood_tracker_controller.read_list),
-    # path("{}/{}/mood-tracker/private-list".format(api, version), mood_tracker_controller.read_list_by_auth),
 
     # Video Content
     path("{}/{}/video-content/create".format(api, version), video_content_controller.create),
@@ -127,4 +122,8 @@ urlpatterns = [
 
     # Terms Privacy
     path("{}/{}/terms-privacy/get-by-type".format(api, version), terms_privacy_controller.read_by_type),
+
+    # Terms Privacy Personal
+    path("{}/{}/terms-privacy-personal/create".format(api, version), terms_privacy_personal_controller.create),
+    path("{}/{}/terms-privacy-personal/get-by-type".format(api, version), terms_privacy_personal_controller.read_by_type),
 ]

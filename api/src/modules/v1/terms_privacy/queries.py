@@ -2,6 +2,13 @@ from django.db.models import Q
 from datetime import datetime
 from .models import TermsPrivacy
 
+def terms_privacy_by_id(id):
+    return TermsPrivacy.objects.filter(
+        is_active=True,
+        deleted_at__isnull=True,
+        id=id
+    )
+
 def terms_privacy_by_type(type, platform, version):
     terms_privacy = TermsPrivacy.objects.filter(
         is_active=True,
