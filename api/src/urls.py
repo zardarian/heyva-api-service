@@ -23,6 +23,7 @@ from src.modules.v1.content import controllers as content_controller
 from src.modules.v1.tracker_type import controllers as tracker_type_controller
 from src.modules.v1.tracker_daily import controllers as tracker_daily_controller
 from src.modules.v1.bookmark import controllers as bookmark_controller
+from src.modules.v1.terms_privacy import controllers as terms_privacy_controller
 
 api = 'api'
 version = 'v1'
@@ -122,5 +123,8 @@ urlpatterns = [
 
     # Bookmark
     path("{}/{}/bookmark/create".format(api, version), bookmark_controller.create),
-    path("{}/{}/bookmark/list".format(api, version), bookmark_controller.read_list)
+    path("{}/{}/bookmark/list".format(api, version), bookmark_controller.read_list),
+
+    # Terms Privacy
+    path("{}/{}/terms-privacy/get-by-type".format(api, version), terms_privacy_controller.read_by_type),
 ]
