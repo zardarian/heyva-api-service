@@ -66,6 +66,13 @@ def user_exists(username, email, phone_number):
         
     return user_exist
 
+def user_exists_active(username, email, phone_number):
+    return User.objects.filter(
+        Q(username=username) | Q(email=email) | Q(phone_number=phone_number),
+        is_active=True,
+        deleted_at__isnull=True,
+    )
+
 def user_exists_verified(username, email, phone_number):
     return User.objects.filter(
         Q(username=username) | Q(email=email) | Q(phone_number=phone_number),

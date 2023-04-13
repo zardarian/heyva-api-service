@@ -15,6 +15,8 @@ USER_DOES_NOT_MATCH = "User Does Not Match"
 
 USER_ALREADY_EXISTS = "User Already Exists"
 USER_DOES_NOT_EXISTS = "User Does Not Exists"
+USER_IS_NOT_VERIFIED = "User Is Not Verified"
+USER_IS_VERIFIED = "User Is Verified"
 USER_VERIFICATION_SUCCESS = "Successfully verify user account"
 PASSWORD_DOES_NOT_MATCH = "Password Does Not Match"
 CONFIRM_PASSWORD_DOES_NOT_MATCH = "Confirm Password Does Not Match"
