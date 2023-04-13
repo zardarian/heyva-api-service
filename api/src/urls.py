@@ -122,8 +122,10 @@ urlpatterns = [
 
     # Terms Privacy
     path("{}/{}/terms-privacy/get-by-type".format(api, version), terms_privacy_controller.read_by_type),
+    path("{}/{}/terms-privacy/list".format(api, version), terms_privacy_controller.read_list),
 
     # Terms Privacy Personal
     path("{}/{}/terms-privacy-personal/create".format(api, version), terms_privacy_personal_controller.create),
+    path("{}/{}/terms-privacy-personal/create-list".format(api, version), terms_privacy_personal_controller.create_list),
     path("{}/{}/terms-privacy-personal/get-by-type".format(api, version), terms_privacy_personal_controller.read_by_type),
 ]

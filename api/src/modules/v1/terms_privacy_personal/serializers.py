@@ -11,5 +11,9 @@ class CreateTermsPrivacyPersonalSerializer(serializers.Serializer):
     terms_privacy = serializers.CharField(required=True)
     is_agree = serializers.BooleanField(required=True)
 
+class CreateTermsPrivacyPersonalListSerializer(serializers.Serializer):
+    terms_privacy = serializers.ListField(required=True, child=serializers.CharField())
+    is_agree = serializers.ListField(required=True, child=serializers.BooleanField())
+
 class ReadTermsPrivacyPersonalByTypeSerializer(serializers.Serializer):
     type = serializers.CharField(required=True)

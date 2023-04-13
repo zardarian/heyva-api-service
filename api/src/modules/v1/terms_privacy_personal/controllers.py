@@ -9,7 +9,7 @@ from src.authentications.basic_auth import CustomBasicAuthentication
 from src.authentications.jwt_auth import CustomJWTAuthentication
 from src.modules.v1.profile.queries import profile_by_user_id
 from src.modules.v1.terms_privacy.queries import terms_privacy_by_id, terms_privacy_by_type
-from .serializers import CreateTermsPrivacyPersonalSerializer, ReadTermsPrivacyPersonalByTypeSerializer, TermsPrivacyPersonalSerializer
+from .serializers import CreateTermsPrivacyPersonalSerializer, ReadTermsPrivacyPersonalByTypeSerializer, TermsPrivacyPersonalSerializer, CreateTermsPrivacyPersonalListSerializer
 from .models import TermsPrivacyPersonal
 from .queries import terms_privacy_personal_by_terms_privacy_id
 import uuid
@@ -38,6 +38,39 @@ def create(request):
             TermsPrivacyPersonal(**terms_privacy_personal_payload).save()
         
         return output_response(success=RESPONSE_SUCCESS, data={'id': terms_privacy_personal_payload.get('id')}, message=None, error=None, status_code=200)
+    except Exception as e:
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        error_message = "{}:{}".format(filename, line_number)
+        return output_response(success=RESPONSE_ERROR, data=None, message=error_message, error=str(e), status_code=500)
+    
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication])
+def create_list(request):
+    payload = CreateTermsPrivacyPersonalListSerializer(data=request.data)
+    if not payload.is_valid():
+        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=payload.errors, status_code=400)
+    
+    validated_payload = payload.validated_data
+    try:
+        with transaction.atomic():
+            terms_privacy_personal_payload = []
+            for index, terms_privacy in enumerate(validated_payload.get('terms_privacy')):    
+                terms_privacy_personal_uuid = uuid.uuid4()
+                
+                payload = TermsPrivacyPersonal(
+                    id=terms_privacy_personal_uuid,
+                    created_at=datetime.now(),
+                    created_by=request.user.get('id'),
+                    profile_code=profile_by_user_id(request.user.get('id')).first(),
+                    terms_privacy=terms_privacy_by_id(terms_privacy).first(),
+                    is_agree=validated_payload.get('is_agree')[index]
+                )
+                terms_privacy_personal_payload.append(payload)
+            TermsPrivacyPersonal.objects.bulk_create(terms_privacy_personal_payload)
+        
+        return output_response(success=RESPONSE_SUCCESS, data=None, message=None, error=None, status_code=200)
     except Exception as e:
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename

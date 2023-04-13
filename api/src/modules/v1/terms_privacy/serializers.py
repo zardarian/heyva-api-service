@@ -11,3 +11,8 @@ class ReadTermsPrivacyByTypeSerializer(serializers.Serializer):
     type = serializers.CharField(required=True)
     platform = serializers.CharField(required=False)
     version = serializers.CharField(required=False)
+
+class ReadListSerializer(serializers.Serializer):
+    type = serializers.ListField(required=False)
+    platform = serializers.CharField(required=False)
+    version = serializers.CharField(required=False)
