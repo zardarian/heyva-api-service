@@ -38,3 +38,7 @@ class UpdateProfileSerializer(serializers.Serializer):
     avatar = serializers.FileField(required=False)
     slug_name = serializers.CharField(required=False)
     about_me = serializers.CharField(required=False)
+    pregnancy_status = serializers.CharField(required=False)
+    interests = serializers.ListField(required=False, child=serializers.CharField(required=False))
+    estimated_due_date = serializers.DateField(required=False)
+    child_birth_date = serializers.DateField(required=False)
