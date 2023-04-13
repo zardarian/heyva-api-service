@@ -94,29 +94,31 @@ def register(request):
             }
             Profile(**profile_payload).save()
 
-            pregnancy_payload = {
-                'id': str(pregnancy_uuid),
-                'created_at' : datetime.now(),
-                'created_by' : user_uuid,
-                'profile_code' : profile_by_code(profile_code).first(),
-                'status' : dictionary_by_id(validated_payload.get('pregnancy_status')).first(),
-                'estimated_due_date' : validated_payload.get('estimated_due_date'),
-                'child_birth_date' : validated_payload.get('child_birth_date'),
-            }
-            Pregnancy(**pregnancy_payload).save()
+            if validated_payload.get('pregnancy_status') or validated_payload.get('estimated_due_date') or validated_payload.get('child_birth_date'):
+                pregnancy_payload = {
+                    'id': str(pregnancy_uuid),
+                    'created_at' : datetime.now(),
+                    'created_by' : user_uuid,
+                    'profile_code' : profile_by_code(profile_code).first(),
+                    'status' : dictionary_by_id(validated_payload.get('pregnancy_status')).first(),
+                    'estimated_due_date' : validated_payload.get('estimated_due_date'),
+                    'child_birth_date' : validated_payload.get('child_birth_date'),
+                }
+                Pregnancy(**pregnancy_payload).save()
 
-            interest_payload = []
-            for interest in validated_payload.get('interests'):
-                interest_uuid = uuid.uuid4()
-                payload = Interest(
-                    id=interest_uuid,
-                    created_at=datetime.now(),
-                    created_by=user_uuid,
-                    profile_code=profile_by_code(profile_code).first(),
-                    interests=dictionary_by_id(interest).first()
-                )
-                interest_payload.append(payload)
-            Interest.objects.bulk_create(interest_payload)
+            if validated_payload.get('interests'):
+                interest_payload = []
+                for interest in validated_payload.get('interests'):
+                    interest_uuid = uuid.uuid4()
+                    payload = Interest(
+                        id=interest_uuid,
+                        created_at=datetime.now(),
+                        created_by=user_uuid,
+                        profile_code=profile_by_code(profile_code).first(),
+                        interests=dictionary_by_id(interest).first()
+                    )
+                    interest_payload.append(payload)
+                Interest.objects.bulk_create(interest_payload)
 
             registration_token = CustomJWTAuthentication.create_registration_token(user_payload)
             if validated_payload.get('email'):

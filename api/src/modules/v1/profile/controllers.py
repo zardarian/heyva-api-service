@@ -8,6 +8,7 @@ from src.storages.services import put_object, remove_object
 from src.modules.v1.dictionary.queries import dictionary_by_id
 from src.modules.v1.pregnancy.queries import pregnancy_by_profile_code
 from src.modules.v1.interest.queries import interests_by_profile_code
+from src.modules.v1.pregnancy.models import Pregnancy
 from src.modules.v1.interest.models import Interest
 from .serializers import ProfileSerializer, UpdateProfileSerializer
 from .models import Profile
@@ -69,15 +70,28 @@ def update(request):
 
             if validated_payload.get('pregnancy_status') or validated_payload.get('estimated_due_date') or validated_payload.get('child_birth_date'):
                 pregnancy = pregnancy_by_profile_code(legacy.get('code'))
-                pregnancy_legacy = pregnancy.values().first()
                 
-                pregnancy.update(
-                    updated_at=datetime.now(),
-                    updated_by=request.user.get('id'),
-                    status=dictionary_by_id(validated_payload.get('pregnancy_status', pregnancy_legacy.get('status'))).first(),
-                    estimated_due_date=validated_payload.get('estimated_due_date', pregnancy_legacy.get('estimated_due_date')),
-                    child_birth_date=validated_payload.get('child_birth_date', pregnancy_legacy.get('child_birth_date'))
-                )
+                if pregnancy:
+                    pregnancy_legacy = pregnancy.values().first()
+                    pregnancy.update(
+                        updated_at=datetime.now(),
+                        updated_by=request.user.get('id'),
+                        status=dictionary_by_id(validated_payload.get('pregnancy_status', pregnancy_legacy.get('status'))).first(),
+                        estimated_due_date=validated_payload.get('estimated_due_date', pregnancy_legacy.get('estimated_due_date')),
+                        child_birth_date=validated_payload.get('child_birth_date', pregnancy_legacy.get('child_birth_date'))
+                    )
+                else:
+                    pregnancy_uuid = uuid.uuid4()
+                    pregnancy_payload = {
+                        'id' : pregnancy_uuid,
+                        'created_at' : datetime.now(),
+                        'created_by' : request.user.get('id'),
+                        'profile_code' : profile_by_code(legacy.get('code')).first(),
+                        'status' : dictionary_by_id(validated_payload.get('pregnancy_status')).first(),
+                        'estimated_due_date' : validated_payload.get('estimated_due_date'),
+                        'child_birth_date' : validated_payload.get('child_birth_date'),
+                    }
+                    Pregnancy(**pregnancy_payload).save()
 
             if validated_payload.get('interests'):
                 interests_by_profile_code(legacy.get('code')).delete()

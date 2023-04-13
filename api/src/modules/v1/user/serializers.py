@@ -28,8 +28,8 @@ class RegisterSerializer(serializers.Serializer):
     full_name = serializers.CharField(required=True)
     gender = serializers.CharField(required=False)
     birth_date = serializers.DateField(required=False)
-    pregnancy_status = serializers.CharField(required=True)
-    interests = serializers.ListField(required=True, child=serializers.CharField(required=True))
+    pregnancy_status = serializers.CharField(required=False)
+    interests = serializers.ListField(required=False, child=serializers.CharField(required=False))
     estimated_due_date = serializers.DateField(required=False)
     child_birth_date = serializers.DateField(required=False)
 
