@@ -25,7 +25,7 @@ def read_list(request):
         validated_payload = payload.validated_data
 
         tracker_type = tracker_type_active(validated_payload.get('type'))
-        serializer = TrackerTypeSerializer(tracker_type, many=True).data
+        serializer = TrackerTypeSerializer(tracker_type, context={'request': request}, many=True).data
 
         return output_response(success=RESPONSE_SUCCESS, data=serializer, message=None, error=None, status_code=200)
     except Exception as e:

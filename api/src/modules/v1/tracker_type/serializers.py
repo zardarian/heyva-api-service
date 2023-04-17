@@ -11,8 +11,9 @@ class TrackerTypeSerializer(serializers.ModelSerializer):
         fields = ['id', 'type', 'title', 'description', 'tracker_detail']
 
     def get_tracker_detail(self, obj):
+        request = self.context.get('request')
         tracker_detail = tracker_detail_by_tracker_type_id(obj.id)
-        return TrackerDetailRelationSerializer(tracker_detail, many=True).data
+        return TrackerDetailRelationSerializer(tracker_detail, context={'request': request}, many=True).data
     
 class TrackerTypeRelationSerializer(serializers.ModelSerializer):
 

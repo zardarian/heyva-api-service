@@ -23,6 +23,14 @@ def output_json(success=None, data=None, message=None, error=None):
     }
     return output
 
+def time_of_day(hour):
+    if hour < 12:
+        return 'Morning'
+    elif hour < 18:
+        return 'Afternoon'
+    else:
+        return 'Evening'
+
 def generate_registration_url(token,  user_id):
     return "{}/{}/{}/{}/{}/{}/{}".format(settings.BASE_URL, 'api', 'v1', 'users', 'verification', user_id, token)
 
