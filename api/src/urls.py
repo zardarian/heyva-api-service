@@ -29,7 +29,7 @@ api = 'api'
 version = 'v1'
 
 urlpatterns = [
-    path("", views.index),
+    path("{}/{}".format(api, version), views.index),
 
     # User
     path("{}/{}/users/register".format(api, version), user_controller.register),
