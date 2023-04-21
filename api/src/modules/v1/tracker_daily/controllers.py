@@ -72,7 +72,7 @@ def insight(request):
         insight = []
         for date_param in validated_payload.get('date'):
             tracker_daily = tracker_daily_insight(request.user.get('profile_code'), validated_payload.get('type'), date_param)
-            tracker_daily_serializer = TrackerDailySerializer(tracker_daily, many=True).data
+            tracker_daily_serializer = TrackerDailySerializer(tracker_daily, context={'request': request}, many=True).data
 
             insight.append({
                 'insight_date': date_param,
