@@ -11,7 +11,7 @@ from src.modules.v1.program.queries import program_by_id
 from src.modules.v1.profile.queries import profile_by_user_id
 from .serializers import CreateProgramPersonalTrackerSerializer
 from .models import ProgramPersonalTracker
-from .queries import program_personal_tracker_not_finished_by_program_id
+from .queries import program_personal_tracker_not_finished_by_program_id, program_personal_tracker_by_program_child_date
 import uuid
 import sys
 
@@ -24,22 +24,27 @@ def create(request):
     
     validated_payload = payload.validated_data
     try:
-        program_personal_tracker_uuid = uuid.uuid4()
+        program_personal = program_personal_tracker_by_program_child_date(request.user.get('profile_code'), validated_payload.get('program'), validated_payload.get('child_program'), datetime.today())
 
-        with transaction.atomic():
-            program_personal_tracker_payload = {
-                'id' : program_personal_tracker_uuid,
-                'created_at' : datetime.now(),
-                'created_by' : request.user.get('id'),
-                'program' : program_by_id(validated_payload.get('program')).first(),
-                'child_program' : program_by_id(validated_payload.get('child_program')).first(),
-                'profile_code' : profile_by_user_id(request.user.get('id')).first(),
-                'is_finished' : False,
-                'check_in_date' : datetime.now(),
-            }
-            ProgramPersonalTracker(**program_personal_tracker_payload).save()
+        if not program_personal:
+            program_personal_tracker_uuid = uuid.uuid4()
 
-        return output_response(success=RESPONSE_SUCCESS, data={'id': program_personal_tracker_payload.get('id')}, message=None, error=None, status_code=200)
+            with transaction.atomic():
+                program_personal_tracker_payload = {
+                    'id' : program_personal_tracker_uuid,
+                    'created_at' : datetime.now(),
+                    'created_by' : request.user.get('id'),
+                    'program' : program_by_id(validated_payload.get('program')).first(),
+                    'child_program' : program_by_id(validated_payload.get('child_program')).first(),
+                    'profile_code' : profile_by_user_id(request.user.get('id')).first(),
+                    'is_finished' : False,
+                    'check_in_date' : datetime.now(),
+                }
+                ProgramPersonalTracker(**program_personal_tracker_payload).save()
+        else:
+            program_personal_tracker_uuid = program_personal.values().first().get('id')
+
+        return output_response(success=RESPONSE_SUCCESS, data={'id': program_personal_tracker_uuid}, message=None, error=None, status_code=200)
     except Exception as e:
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename
@@ -51,7 +56,7 @@ def create(request):
 @authentication_classes([CustomJWTAuthentication])
 def finish_program(request, program_id):
     try:
-        program_personal_tracker = program_personal_tracker_not_finished_by_program_id(program_id)
+        program_personal_tracker = program_personal_tracker_not_finished_by_program_id(request.user.get('profile_code'), program_id)
 
         with transaction.atomic():
             program_personal_tracker.update(

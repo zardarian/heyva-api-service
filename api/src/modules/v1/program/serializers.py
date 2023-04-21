@@ -1,9 +1,11 @@
 from rest_framework import serializers
 from datetime import datetime
 from src.storages.services import get_object
+from src.modules.v1.program.queries import program_active_by_parent_id
 from src.modules.v1.program_tag.queries import program_tag_by_program_id
 from src.modules.v1.program_detail.queries import program_detail_by_program_id
 from src.modules.v1.program_personal.queries import program_personal_not_finished_by_program_id
+from src.modules.v1.program_personal_tracker.queries import program_personal_tracker_finished_by_program_id
 from src.modules.v1.program_tag.serializers import ProgramTagRelationSerializer
 from src.modules.v1.program_detail.serializers import ProgramDetailRelationSerializer
 from .models import Program
@@ -63,10 +65,11 @@ class ProgramByAuthSerializer(serializers.ModelSerializer):
     child = serializers.SerializerMethodField()
     program_detail = serializers.SerializerMethodField()
     days_count = serializers.SerializerMethodField()
+    daily_progress = serializers.SerializerMethodField()
 
     class Meta:
         model = Program
-        fields = ['id', 'title', 'body', 'banner', 'parent', 'order', 'thumbnail', 'tags', 'child', 'program_detail', 'days_count']
+        fields = ['id', 'title', 'body', 'banner', 'parent', 'order', 'thumbnail', 'tags', 'child', 'program_detail', 'days_count', 'daily_progress']
 
     def get_banner(self, obj):
         return get_object(obj.banner)
@@ -93,11 +96,27 @@ class ProgramByAuthSerializer(serializers.ModelSerializer):
             start_date = datetime.combine(program_personal.get('start_date'), datetime.min.time())
             end_date = datetime.combine(program_personal.get('end_date'), datetime.min.time())
             today = datetime.now()
-            elapsed_days = (today - start_date).days
+            elapsed_days = (today - start_date).days + 1
             total_days = (end_date - start_date).days
 
             return "{}/{}".format(elapsed_days, total_days)
         return None
+    
+    def get_daily_progress(self, obj):
+        program_progress = 0
+        total_program = 0
+        program_personal = program_personal_not_finished_by_program_id(obj.id)
+        program_child = program_active_by_parent_id(obj.id)
+        if program_child:
+            total_program = len(program_child)
+        else:
+            total_program = len(program_personal)
+
+        finished_program = program_personal_tracker_finished_by_program_id(obj.id)
+        if finished_program:
+            program_progress = len(finished_program)
+
+        return "{}/{}".format(program_progress, total_program)
     
 class ChildProgramSerializer(serializers.ModelSerializer):
     banner = serializers.SerializerMethodField()

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from src.paginations.page_number_pagination import CustomPageNumberPagination
 from src.helpers import output_response
 from src.storages.services import put_object, remove_object
-from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJECTS_NOT_FOUND
+from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJECTS_NOT_FOUND, OBJECTS_ALREADY_EXISTS
 from src.authentications.basic_auth import CustomBasicAuthentication
 from src.authentications.jwt_auth import CustomJWTAuthentication
 from src.modules.v1.program.queries import program_by_id
@@ -26,6 +26,10 @@ def create(request):
     
     validated_payload = payload.validated_data
     try:
+        program_personal = program_personal_not_finished_by_program_id(request.user.get('profile_code'), validated_payload.get('program'))
+        if program_personal:
+            return output_response(success=RESPONSE_FAILED, data=None, message=OBJECTS_ALREADY_EXISTS, error=None, status_code=400)
+
         program_personal_uuid = uuid.uuid4()
 
         with transaction.atomic():

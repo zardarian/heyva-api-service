@@ -25,6 +25,7 @@ AUTHENTICATION_FAILED = "Authentication Failed"
 
 PAYLOAD_CANNOT_BE_EMPTY = "Payload cannot be empty"
 OBJECTS_NOT_FOUND = "Objects Not Found"
+OBJECTS_ALREADY_EXISTS = "Objects Already Exists"
 SUCCESSFULLY_INSERT = "Successfully Insert"
 FAILED_INSERT = "Failed to Insert"
 SUCCESSFULLY_UPDATE = "Successfully Update"
