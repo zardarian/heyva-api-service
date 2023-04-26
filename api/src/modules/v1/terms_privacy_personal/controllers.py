@@ -24,20 +24,31 @@ def create(request):
     
     validated_payload = payload.validated_data
     try:
-        terms_privacy_personal_uuid = uuid.uuid4()
-
         with transaction.atomic():
-            terms_privacy_personal_payload = {
-                'id' : terms_privacy_personal_uuid,
-                'created_at' : datetime.now(),
-                'created_by' : request.user.get('id'),
-                'profile_code' : profile_by_user_id(request.user.get('id')).first(),
-                'terms_privacy' : terms_privacy_by_id(validated_payload.get('terms_privacy')).first(),
-                'is_agree' : validated_payload.get('is_agree'),
-            }
-            TermsPrivacyPersonal(**terms_privacy_personal_payload).save()
+            terms_privacy_personal = terms_privacy_personal_by_terms_privacy_id(request.user.get('profile_code'), validated_payload.get('terms_privacy'))
+
+            if not terms_privacy_personal:
+                terms_privacy_personal_uuid = uuid.uuid4()
+
+                terms_privacy_personal_payload = {
+                    'id' : terms_privacy_personal_uuid,
+                    'created_at' : datetime.now(),
+                    'created_by' : request.user.get('id'),
+                    'profile_code' : profile_by_user_id(request.user.get('id')).first(),
+                    'terms_privacy' : terms_privacy_by_id(validated_payload.get('terms_privacy')).first(),
+                    'is_agree' : validated_payload.get('is_agree'),
+                }
+                TermsPrivacyPersonal(**terms_privacy_personal_payload).save()
+            else:
+                terms_privacy_personal_uuid = terms_privacy_personal.values().first().get('id')
+
+                terms_privacy_personal.update(
+                    is_agree=validated_payload.get('is_agree'),
+                    updated_at=datetime.now(),
+                    updated_by=request.user.get('id')
+                )
         
-        return output_response(success=RESPONSE_SUCCESS, data={'id': terms_privacy_personal_payload.get('id')}, message=None, error=None, status_code=200)
+        return output_response(success=RESPONSE_SUCCESS, data={'id': terms_privacy_personal_uuid}, message=None, error=None, status_code=200)
     except Exception as e:
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename
@@ -56,19 +67,30 @@ def create_list(request):
     try:
         with transaction.atomic():
             terms_privacy_personal_payload = []
-            for index, terms_privacy in enumerate(validated_payload.get('terms_privacy')):    
-                terms_privacy_personal_uuid = uuid.uuid4()
-                
-                payload = TermsPrivacyPersonal(
-                    id=terms_privacy_personal_uuid,
-                    created_at=datetime.now(),
-                    created_by=request.user.get('id'),
-                    profile_code=profile_by_user_id(request.user.get('id')).first(),
-                    terms_privacy=terms_privacy_by_id(terms_privacy).first(),
-                    is_agree=validated_payload.get('is_agree')[index]
-                )
-                terms_privacy_personal_payload.append(payload)
-            TermsPrivacyPersonal.objects.bulk_create(terms_privacy_personal_payload)
+            for index, terms_privacy in enumerate(validated_payload.get('terms_privacy')):
+                terms_privacy_personal = terms_privacy_personal_by_terms_privacy_id(request.user.get('profile_code'), terms_privacy)
+
+                if not terms_privacy_personal:
+                    terms_privacy_personal_uuid = uuid.uuid4()
+                    
+                    payload = TermsPrivacyPersonal(
+                        id=terms_privacy_personal_uuid,
+                        created_at=datetime.now(),
+                        created_by=request.user.get('id'),
+                        profile_code=profile_by_user_id(request.user.get('id')).first(),
+                        terms_privacy=terms_privacy_by_id(terms_privacy).first(),
+                        is_agree=validated_payload.get('is_agree')[index]
+                    )
+                    terms_privacy_personal_payload.append(payload)
+                else:
+                    terms_privacy_personal.update(
+                        is_agree=validated_payload.get('is_agree')[index],
+                        updated_at=datetime.now(),
+                        updated_by=request.user.get('id')
+                    )
+
+            if terms_privacy_personal_payload:
+                TermsPrivacyPersonal.objects.bulk_create(terms_privacy_personal_payload)
         
         return output_response(success=RESPONSE_SUCCESS, data=None, message=None, error=None, status_code=200)
     except Exception as e:

@@ -62,8 +62,8 @@ class CreateArticleSerializer(serializers.Serializer):
     title = serializers.CharField(required=True)
     body = serializers.CharField(required=True)
     creator = serializers.CharField(required=True)
-    banner = serializers.FileField(required=True)
-    thumbnail = serializers.FileField(required=True)
+    banner = serializers.FileField(required=False)
+    thumbnail = serializers.FileField(required=False)
     tag = serializers.ListField(required=True)
     attachment = serializers.ListField(required=False, child=serializers.CharField(required=False))
 
