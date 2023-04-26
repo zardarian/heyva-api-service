@@ -90,7 +90,8 @@ class ProgramByAuthSerializer(serializers.ModelSerializer):
         return ProgramDetailRelationSerializer(program_detail, many=True).data
     
     def get_days_count(self, obj):
-        program_personal = program_personal_not_finished_by_program_id(obj.id)
+        request = self.context.get('request')
+        program_personal = program_personal_not_finished_by_program_id(request.user.get('profile_code'), obj.id)
         if program_personal:
             program_personal = program_personal.values().first()
             start_date = datetime.combine(program_personal.get('start_date'), datetime.min.time())
@@ -103,16 +104,17 @@ class ProgramByAuthSerializer(serializers.ModelSerializer):
         return None
     
     def get_daily_progress(self, obj):
+        request = self.context.get('request')
         program_progress = 0
         total_program = 0
-        program_personal = program_personal_not_finished_by_program_id(obj.id)
+        program_personal = program_personal_not_finished_by_program_id(request.user.get('profile_code'), obj.id)
         program_child = program_active_by_parent_id(obj.id)
         if program_child:
             total_program = len(program_child)
         else:
             total_program = len(program_personal)
 
-        finished_program = program_personal_tracker_finished_by_program_id(obj.id)
+        finished_program = program_personal_tracker_finished_by_program_id(request.user.get('profile_code'), obj.id)
         if finished_program:
             program_progress = len(finished_program)
 
