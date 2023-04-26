@@ -28,7 +28,7 @@ def create(request):
     try:
         program_personal = program_personal_not_finished_by_program_id(request.user.get('profile_code'), validated_payload.get('program'))
         if program_personal:
-            return output_response(success=RESPONSE_FAILED, data=None, message=OBJECTS_ALREADY_EXISTS, error=None, status_code=400)
+            return output_response(success=RESPONSE_SUCCESS, data={'id': program_personal.values().first().get('id')}, message=OBJECTS_ALREADY_EXISTS, error=None, status_code=200)
 
         program_personal_uuid = uuid.uuid4()
 
