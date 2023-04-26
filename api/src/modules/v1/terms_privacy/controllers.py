@@ -57,7 +57,7 @@ def read_list(request):
         
         paginator = CustomPageNumberPagination()
         result_page = paginator.paginate_queryset(terms_privacy, request)
-        serializer = TermsPrivacySerializer(result_page, many=True)
+        serializer = TermsPrivacySerializer(result_page, context={'request': request}, many=True)
 
         return paginator.get_paginated_response(success=RESPONSE_SUCCESS, data=serializer.data, message=None, error=None, status_code=200)
     except Exception as e:
