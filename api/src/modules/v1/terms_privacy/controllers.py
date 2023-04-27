@@ -31,7 +31,7 @@ def read_by_type(request):
         if not terms_privacy:
             return output_response(success=RESPONSE_FAILED, data=None, message=OBJECTS_NOT_FOUND, error=None, status_code=400)
         
-        serializer = TermsPrivacySerializer(terms_privacy.first()).data
+        serializer = TermsPrivacySerializer(terms_privacy.first(), context={'request': request}).data
 
         return output_response(success=RESPONSE_SUCCESS, data=serializer, message=None, error=None, status_code=200)
     except Exception as e:
