@@ -5,7 +5,7 @@ from src.modules.v1.program.queries import program_active_by_parent_id
 from src.modules.v1.program_tag.queries import program_tag_by_program_id
 from src.modules.v1.program_detail.queries import program_detail_by_program_id
 from src.modules.v1.program_personal.queries import program_personal_not_finished_by_program_id
-from src.modules.v1.program_personal_tracker.queries import program_personal_tracker_finished_by_program_id
+from src.modules.v1.program_personal_tracker.queries import program_personal_tracker_finished_by_program_id_date
 from src.modules.v1.program_tag.serializers import ProgramTagRelationSerializer
 from src.modules.v1.program_detail.serializers import ProgramDetailRelationSerializer
 from .models import Program
@@ -114,7 +114,7 @@ class ProgramByAuthSerializer(serializers.ModelSerializer):
         else:
             total_program = len(program_personal)
 
-        finished_program = program_personal_tracker_finished_by_program_id(request.user.get('profile_code'), obj.id)
+        finished_program = program_personal_tracker_finished_by_program_id_date(request.user.get('profile_code'), obj.id, datetime.today())
         if finished_program:
             program_progress = len(finished_program)
 

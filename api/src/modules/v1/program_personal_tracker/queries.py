@@ -17,6 +17,15 @@ def program_personal_tracker_finished_by_program_id(profile_code, program_id):
         is_finished=True
     )
 
+def program_personal_tracker_finished_by_program_id_date(profile_code, program_id, check_in_date):
+    return ProgramPersonalTracker.objects.filter(
+        Q(program=program_id) | Q(child_program=program_id),
+        profile_code=profile_code,
+        deleted_at__isnull=True,
+        is_finished=True,
+        check_in_date=check_in_date
+    )
+
 def program_personal_tracker_by_program_child_date(profile_code, program_id, child_program_id, check_in_date):
     program_personal_tracker = ProgramPersonalTracker.objects.filter(
         profile_code=profile_code,
