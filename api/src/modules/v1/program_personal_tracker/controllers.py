@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from src.paginations.page_number_pagination import CustomPageNumberPagination
 from src.helpers import output_response
 from src.storages.services import put_object, remove_object
-from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJECTS_NOT_FOUND
+from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, OBJECTS_ALREADY_EXISTS
 from src.authentications.basic_auth import CustomBasicAuthentication
 from src.authentications.jwt_auth import CustomJWTAuthentication
 from src.modules.v1.program.queries import program_by_id
@@ -42,7 +42,11 @@ def create(request):
                 }
                 ProgramPersonalTracker(**program_personal_tracker_payload).save()
         else:
-            program_personal_tracker_uuid = program_personal.values().first().get('id')
+            program_personal_legacy = program_personal.values().first()
+            program_personal_tracker_uuid = program_personal_legacy.get('id')
+
+            if program_personal_legacy.get('is_finished') == True:
+                return output_response(success=RESPONSE_FAILED, data=None, message=OBJECTS_ALREADY_EXISTS, error=None, status_code=400)
 
         return output_response(success=RESPONSE_SUCCESS, data={'id': program_personal_tracker_uuid}, message=None, error=None, status_code=200)
     except Exception as e:

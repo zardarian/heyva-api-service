@@ -34,7 +34,7 @@ def program_personal_tracker_by_program_child_date(profile_code, program_id, chi
     )
 
     if child_program_id:
-        program_personal_tracker = program_personal_tracker.filter(child_program=program_id)
+        program_personal_tracker = program_personal_tracker.filter(child_program=child_program_id)
 
     if check_in_date:
         program_personal_tracker = program_personal_tracker.filter(check_in_date=check_in_date)
