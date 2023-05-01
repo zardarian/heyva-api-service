@@ -24,12 +24,16 @@ from src.modules.v1.tracker_daily import controllers as tracker_daily_controller
 from src.modules.v1.bookmark import controllers as bookmark_controller
 from src.modules.v1.terms_privacy import controllers as terms_privacy_controller
 from src.modules.v1.terms_privacy_personal import controllers as terms_privacy_personal_controller
+from src.modules.oauth2.controllers import SocialLoginView
 
 api = 'api'
 version = 'v1'
 
 urlpatterns = [
     path("{}/{}".format(api, version), views.index),
+
+    # Oauth2
+    path("{}/{}/social-login".format(api, version), SocialLoginView.as_view(), name='social-login'),
 
     # User
     path("{}/{}/users/register".format(api, version), user_controller.register),
