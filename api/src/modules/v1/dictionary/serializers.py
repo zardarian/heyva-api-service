@@ -19,6 +19,7 @@ class CreateDictionarySerializer(serializers.Serializer):
     value = serializers.IntegerField(required=False)
 
 class ReadByTypeDictionarySerializer(serializers.Serializer):
+    id = serializers.ListField(required=False, child=serializers.CharField())
     type = serializers.CharField(required=True)
     search = serializers.CharField(required=False)
 

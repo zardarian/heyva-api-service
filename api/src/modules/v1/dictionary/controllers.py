@@ -8,7 +8,7 @@ from src.permissions.super_admin_permission import IsSuperAdmin
 from datetime import datetime
 from .serializers import CreateDictionarySerializer, ReadByTypeDictionarySerializer, DictionarySerializer, UpdateDictionarySerializer
 from .models import Dictionary
-from .queries import dictionary_active_by_type, dictionary_by_id
+from .queries import dictionary_active_by_type_id, dictionary_by_id
 import uuid
 import sys
 
@@ -53,7 +53,7 @@ def read_by_type(request):
             return output_response(success=RESPONSE_FAILED, data=None, message=None, error=payload.errors, status_code=400)
         
         validated_payload = payload.validated_data
-        dictionary = dictionary_active_by_type(validated_payload.get('type'), validated_payload.get('search'))
+        dictionary = dictionary_active_by_type_id(validated_payload.get('type'), validated_payload.get('id'), validated_payload.get('search'))
 
         return output_response(success=RESPONSE_SUCCESS, data=DictionarySerializer(dictionary, many=True).data, message=None, error=None, status_code=200)
     except Exception as e:
