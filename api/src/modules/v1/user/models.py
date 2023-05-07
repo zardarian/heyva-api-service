@@ -15,6 +15,9 @@ class User(models.Model):
     password = models.TextField()
     last_login = models.DateTimeField(blank=True, null=True)
     is_verified = models.BooleanField()
+    channel = models.CharField(max_length=36, blank=True, null=True)
+    channel_id_token = models.CharField(max_length=36, blank=True, null=True)
+    device_id = models.CharField(max_length=36, blank=True, null=True)
 
     class Meta:
         managed = False

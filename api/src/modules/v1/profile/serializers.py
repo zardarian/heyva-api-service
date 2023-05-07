@@ -20,6 +20,12 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ['id', 'code', 'full_name', 'name_alias', 'birth_date', 'gender', 'avatar', 'slug_name', 'about_me', 'pregnancy', 'interests', 'user']
 
     def get_avatar(self, obj):
+        if not obj.avatar:
+            return None
+        
+        if 'http' in obj.avatar:
+            return obj.avatar
+        
         return get_object(obj.avatar, 3600)
 
     def get_pregnancy(self, obj):

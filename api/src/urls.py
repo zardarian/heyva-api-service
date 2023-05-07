@@ -41,6 +41,8 @@ urlpatterns = [
     path("{}/{}/users/request-reset-password".format(api, version), user_controller.request_reset_password),
     path("{}/{}/users/reset-password/<id>/<reset_password_token>".format(api, version), user_controller.reset_password),
     path("{}/{}/users/check-verification".format(api, version), user_controller.check_verification),
+    path("{}/{}/users/register/google".format(api, version), user_controller.google_register),
+    path("{}/{}/users/login/google".format(api, version), user_controller.google_login),
 
     # Dictionary
     path("{}/{}/dictionary/create".format(api, version), dictionary_controller.create),

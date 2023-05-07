@@ -72,3 +72,20 @@ class ResetPasswordSerializer(serializers.Serializer):
 
 class CheckVerificationSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
+
+class GoogleRegisterSerializer(serializers.Serializer):
+    full_name = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
+    google_id = serializers.CharField(required=True)
+    avatar = serializers.CharField(required=True)
+    device_id = serializers.CharField(required=False)
+    birth_date = serializers.DateField(required=False)
+    gender = serializers.CharField(required=False)
+    pregnancy_status = serializers.CharField(required=False)
+    interests = serializers.ListField(required=False, child=serializers.CharField(required=False))
+    estimated_due_date = serializers.DateField(required=False)
+    child_birth_date = serializers.DateField(required=False)
+
+class GoogleLoginSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    google_id = serializers.CharField(required=True)

@@ -22,6 +22,7 @@ PASSWORD_DOES_NOT_MATCH = "Password Does Not Match"
 CONFIRM_PASSWORD_DOES_NOT_MATCH = "Confirm Password Does Not Match"
 PASSWORD_CANNOT_BE_THE_SAME_AS_PREVIOUS_PASSWORD = "Password cannot be the same as previous password"
 AUTHENTICATION_FAILED = "Authentication Failed"
+CHANNEL_ID_TOKEN_DOES_NOT_MATCH = "Channel ID Token Does Not Match"
 
 PAYLOAD_CANNOT_BE_EMPTY = "Payload cannot be empty"
 OBJECTS_NOT_FOUND = "Objects Not Found"

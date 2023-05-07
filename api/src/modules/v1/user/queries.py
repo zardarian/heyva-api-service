@@ -95,3 +95,14 @@ def user_by_id(id):
         is_active=True,
         deleted_at__isnull=True,
     )
+
+def social_user(email, channel):
+    user = User.objects.filter(
+        Q(email=email),
+        is_active=True,
+        deleted_at__isnull=True,
+        is_verified=True,
+        channel=channel
+    )
+
+    return user
