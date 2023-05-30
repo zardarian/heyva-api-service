@@ -43,6 +43,7 @@ urlpatterns = [
     path("{}/{}/users/check-verification".format(api, version), user_controller.check_verification),
     path("{}/{}/users/register/google".format(api, version), user_controller.google_register),
     path("{}/{}/users/login/google".format(api, version), user_controller.google_login),
+    path("{}/{}/users/delete".format(api, version), user_controller.delete),
 
     # Dictionary
     path("{}/{}/dictionary/create".format(api, version), dictionary_controller.create),
