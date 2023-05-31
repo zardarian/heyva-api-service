@@ -25,8 +25,14 @@ from src.modules.v1.bookmark import controllers as bookmark_controller
 from src.modules.v1.terms_privacy import controllers as terms_privacy_controller
 from src.modules.v1.terms_privacy_personal import controllers as terms_privacy_personal_controller
 
+# queue
+from django_q.tasks import schedule
+from src.queue.notifications.tasks import schedule_daily_notifications
+
 api = 'api'
 version = 'v1'
+
+schedule(schedule_daily_notifications, schedule_type='I', minutes=1)
 
 urlpatterns = [
     path("{}/{}".format(api, version), views.index),

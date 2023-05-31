@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'storages',
+    'django_q'
 ]
 
 MIDDLEWARE = [
@@ -192,3 +193,16 @@ GOOGLE_CLIENT_SECRET=env('GOOGLE_CLIENT_SECRET')
 
 COMPANY_LOGO=env('COMPANY_LOGO')
 COMPANY_HELPER_MAIL=env('COMPANY_HELPER_MAIL')
+
+Q_CLUSTER = {
+    'name': 'DjangORM',
+    'workers': 4,
+    'timeout': 90,
+    'retry': 120,
+    'queue_limit': 50,
+    'bulk': 10,
+    'orm': 'default'
+}
+
+PUSHER_INSTANCE_ID=env('PUSHER_INSTANCE_ID')
+PUSHER_PRIMARY_KEY=env('PUSHER_PRIMARY_KEY')
