@@ -36,6 +36,7 @@ class RegisterSerializer(serializers.Serializer):
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
+    device_id = serializers.CharField(required=False)
 
 class RefreshTokenSerializer(serializers.Serializer):
     id = serializers.CharField(required=True)
@@ -89,3 +90,4 @@ class GoogleRegisterSerializer(serializers.Serializer):
 class GoogleLoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     google_id = serializers.CharField(required=True)
+    device_id = serializers.CharField(required=False)
