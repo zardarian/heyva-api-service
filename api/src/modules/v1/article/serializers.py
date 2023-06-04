@@ -66,7 +66,9 @@ class CreateArticleSerializer(serializers.Serializer):
     thumbnail = serializers.FileField(required=False)
     tag = serializers.ListField(required=True)
     attachment = serializers.ListField(required=False, child=serializers.CharField(required=False))
+    app_env = serializers.CharField(required=False)
 
 class ReadSerializer(serializers.Serializer):
     search = serializers.CharField(required=False)
     tag = serializers.ListField(required=False)
+    app_env = serializers.CharField(required=False)

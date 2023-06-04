@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.conf import settings
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from src.storages.services import put_object, remove_object
 from src.paginations.page_number_pagination import CustomPageNumberPagination
@@ -45,6 +46,7 @@ def create(request):
                 'creator' : validated_payload.get('creator'),
                 'banner' : banner,
                 'thumbnail' : thumbnail,
+                'app_env' : validated_payload.get('app_env', settings.APPLICATION_ENVIRONMENT)
             }
             Article(**article_payload).save()
 
@@ -99,7 +101,7 @@ def read_list(request):
         validated_payload = payload.validated_data
 
         paginator = CustomPageNumberPagination()
-        article = article_active(validated_payload.get('search'), validated_payload.get('tag'))
+        article = article_active(validated_payload.get('search'), validated_payload.get('tag'), validated_payload.get('app_env', settings.APPLICATION_ENVIRONMENT))
         result_page = paginator.paginate_queryset(article, request)
         serializer = ArticleSerializer(result_page, many=True)
 

@@ -14,6 +14,7 @@ class Article(models.Model):
     creator = models.TextField(blank=True, null=True)
     banner = models.TextField(blank=True, null=True)
     thumbnail = models.TextField(blank=True, null=True)
+    app_env = models.CharField(max_length=36, blank=True, null=True)
 
     class Meta:
         managed = False
