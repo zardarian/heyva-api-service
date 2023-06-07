@@ -35,6 +35,8 @@ if env('DEBUG').lower() == 'true':
 else:
     DEBUG = False
 
+APPLICATION_ENVIRONMENT = env('APPLICATION_ENVIRONMENT')
+
 ALLOWED_HOSTS = ['*']
 
 

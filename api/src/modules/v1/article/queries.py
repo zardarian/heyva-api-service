@@ -1,7 +1,7 @@
 from django.db.models import Q
 from .models import Article
 
-def article_active(search, tag):
+def article_active(search, tag, app_env):
     article = Article.objects.filter(
         is_active=True,
         deleted_at__isnull=True
@@ -15,6 +15,11 @@ def article_active(search, tag):
     if tag:
         article = article.filter(
             article_tag__tag__in=tag
+        )
+
+    if app_env:
+        article = article.filter(
+            app_env=app_env
         )
     
     return article.distinct('id', 'created_at').order_by('-created_at')

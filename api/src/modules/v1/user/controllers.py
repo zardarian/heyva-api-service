@@ -217,7 +217,8 @@ def login(request):
         with transaction.atomic():
             user_update = user_by_id(user.get('id'))
             user_update.update(
-                last_login=datetime.now()
+                last_login=datetime.now(),
+                device_id=validated_payload.get('device_id')
             )
 
         return output_response(success=RESPONSE_SUCCESS, data=response_data.validated_data, message=None, error=None, status_code=200)
@@ -585,7 +586,8 @@ def google_login(request):
         with transaction.atomic():
             user_update = user_by_id(user.get('id'))
             user_update.update(
-                last_login=datetime.now()
+                last_login=datetime.now(),
+                device_id=validated_payload.get('device_id')
             )
 
         return output_response(success=RESPONSE_SUCCESS, data=response_data.validated_data, message=None, error=None, status_code=200)
