@@ -1,7 +1,8 @@
+from django.conf import settings
 from django.db.models import Q
 from .models import Content
 
-def content_active(search, tag):
+def content_active(search, tag, app_env):
     content = Content.objects.filter(
         is_active=True,
         deleted_at__isnull=True
@@ -12,15 +13,29 @@ def content_active(search, tag):
             tables=['article', 'video_content', 'program'],
             where=[
                 '''
-                    (article.id = content.content_reference_id and article.title ilike %s)
+                    (article.id = content.content_reference_id and article.title ilike %s and article.app_env = %s)
                     or (video_content.id = content.content_reference_id and video_content.title ilike %s)
                     or (program.id = content.content_reference_id and program.title ilike %s)
                 '''
             ],
             params=[
-                "{}{}{}".format('%', search, '%'),
+                "{}{}{}".format('%', search, '%'), app_env,
                 "{}{}{}".format('%', search, '%'),
                 "{}{}{}".format('%', search, '%')
+            ]
+        )
+    else:
+        content = content.extra(
+            tables=['article', 'video_content', 'program'],
+            where=[
+                '''
+                    (article.id = content.content_reference_id and article.app_env = %s)
+                    or (video_content.id = content.content_reference_id)
+                    or (program.id = content.content_reference_id)
+                '''
+            ],
+            params=[
+                app_env,
             ]
         )
 

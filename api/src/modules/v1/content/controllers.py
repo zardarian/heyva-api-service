@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import transaction
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from datetime import datetime
@@ -27,7 +28,7 @@ def read_list(request):
         validated_payload = payload.validated_data
 
         paginator = CustomPageNumberPagination()
-        content = content_active(validated_payload.get('search'), validated_payload.get('tag'))
+        content = content_active(validated_payload.get('search'), validated_payload.get('tag'), validated_payload.get('app_env', settings.APPLICATION_ENVIRONMENT))
         result_page = paginator.paginate_queryset(content, request)
         serializer = PreviewContentSerializer(result_page, many=True)
 

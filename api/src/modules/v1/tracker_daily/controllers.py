@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import transaction
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from datetime import datetime
@@ -111,7 +112,7 @@ def recommendation(request):
             return output_response(success=RESPONSE_FAILED, data=None, message=EMPTY_DATA, error=None, status_code=400)
 
         paginator = CustomPageNumberPagination()
-        contents = content_active(search=None, tag=tags)
+        contents = content_active(search=None, tag=tags, app_env=validated_payload.get('app_env', settings.APPLICATION_ENVIRONMENT))
         result_page = paginator.paginate_queryset(contents, request)
         contents_serializer = PreviewContentSerializer(result_page, many=True).data
 
