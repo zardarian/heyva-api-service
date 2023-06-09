@@ -32,7 +32,7 @@ from src.queue.notifications.tasks import schedule_daily_notifications
 api = 'api'
 version = 'v1'
 
-schedule(schedule_daily_notifications, schedule_type='I', minutes=1)
+# schedule(schedule_daily_notifications, schedule_type='I', minutes=1)
 
 urlpatterns = [
     path("{}/{}".format(api, version), views.index),

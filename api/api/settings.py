@@ -197,6 +197,7 @@ COMPANY_LOGO=env('COMPANY_LOGO')
 COMPANY_HELPER_MAIL=env('COMPANY_HELPER_MAIL')
 
 Q_CLUSTER = {
+    'AUTO_RESTART': False,
     'name': 'DjangORM',
     'workers': 4,
     'timeout': 90,
@@ -204,6 +205,23 @@ Q_CLUSTER = {
     'queue_limit': 50,
     'bulk': 10,
     'orm': 'default'
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django_q': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
 }
 
 PUSHER_INSTANCE_ID=env('PUSHER_INSTANCE_ID')
