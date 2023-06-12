@@ -35,7 +35,7 @@ def generate_registration_url(token,  user_id):
     return "{}/{}/{}/{}/{}/{}/{}".format(settings.BASE_URL, 'api', 'v1', 'users', 'verification', user_id, token)
 
 def generate_request_reset_password_url(token, user_id):
-    return "{}/{}/{}/{}/{}/{}/{}".format(settings.BASE_URL, 'api', 'v1', 'users', 'request-reset-password', user_id, token)
+    return "{}/{}/{}/{}/{}".format(settings.APPLICATION_URL, '#', 'forgotpassword', user_id, token)
 
 def encrypt(txt):
     try:
