@@ -9,11 +9,12 @@ from src.authentications.basic_auth import CustomBasicAuthentication
 from src.authentications.jwt_auth import CustomJWTAuthentication
 from src.permissions.admin_permission import IsAdmin
 from src.modules.v1.article_tag.models import ArticleTag
+from src.modules.v1.article_tag.queries import article_tag_by_article_id
 from src.modules.v1.content.models import Content
 from src.modules.v1.dictionary.queries import dictionary_by_id
 from src.modules.v1.article_attachment.queries import article_attachment_by_multiple_id
 from datetime import datetime
-from .serializers import CreateArticleSerializer, ArticleSerializer, ReadSerializer
+from .serializers import CreateArticleSerializer, ArticleSerializer, ReadSerializer, UpdateArticleSerializer
 from .models import Article
 from .queries import article_active, article_by_id
 import uuid
@@ -83,6 +84,80 @@ def create(request):
     except Exception as e:
         remove_object(article_payload.get('banner'))
         remove_object(article_payload.get('thumbnail'))
+
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        error_message = "{}:{}".format(filename, line_number)
+        return output_response(success=RESPONSE_ERROR, data=None, message=error_message, error=str(e), status_code=500)
+    
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication])
+@permission_classes([IsAdmin])
+def update(request, id):
+    payload = UpdateArticleSerializer(data=request.data)
+    if not payload.is_valid():
+        return output_response(success=RESPONSE_FAILED, data=None, message=None, error=payload.errors, status_code=400)
+    
+    validated_payload = payload.validated_data
+    try:
+        article = article_by_id(id)
+        if not article:
+            return output_response(success=RESPONSE_FAILED, data=None, message=OBJECTS_NOT_FOUND, error=None, status_code=400)
+        
+        legacy = article.values().first()
+        
+        with transaction.atomic():
+            if validated_payload.get('banner'):
+                remove_object(legacy.get('banner'))
+                banner = put_object('article/banner', validated_payload.get('banner'))
+            else:
+                banner = legacy.get('banner')
+
+            if validated_payload.get('thumbnail'):
+                remove_object(legacy.get('thumbnail'))
+                thumbnail = put_object('article/thumbnail', validated_payload.get('thumbnail'))
+            else:
+                thumbnail = legacy.get('thumbnail')
+
+            article.update(
+                updated_at=datetime.now(),
+                updated_by=request.user.get('id'),
+                title=validated_payload.get('title', legacy.get('title')),
+                body=validated_payload.get('body', legacy.get('body')),
+                creator=validated_payload.get('creator', legacy.get('creator')),
+                banner=banner,
+                thumbnail=thumbnail,
+                app_env=validated_payload.get('app_env', legacy.get('app_env'))
+            )
+
+            if validated_payload.get('tag'):
+                article_tag = article_tag_by_article_id(id)
+                article_tag.delete()
+
+                tag_payload = []
+                for tag in validated_payload.get('tag'):
+                    tag_uuid = uuid.uuid4()
+                    payload = ArticleTag(
+                        id=tag_uuid,
+                        created_at=datetime.now(),
+                        created_by=request.user.get('id'),
+                        article=article_by_id(id).first(),
+                        tag=dictionary_by_id(tag).first(),
+                    )
+                    tag_payload.append(payload)
+                ArticleTag.objects.bulk_create(tag_payload)
+
+            if validated_payload.get('attachment'):
+                article_attachment = article_attachment_by_multiple_id(validated_payload.get('attachment'))
+                article_attachment.update(
+                    article=str(id)
+                )
+        
+        return output_response(success=RESPONSE_SUCCESS, data={'id': id}, message=None, error=None, status_code=200)
+    except Exception as e:
+        remove_object(validated_payload.get('banner'))
+        remove_object(validated_payload.get('thumbnail'))
 
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename
