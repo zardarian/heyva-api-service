@@ -165,6 +165,31 @@ def update(request, id):
         error_message = "{}:{}".format(filename, line_number)
         return output_response(success=RESPONSE_ERROR, data=None, message=error_message, error=str(e), status_code=500)
     
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication])
+@permission_classes([IsAdmin])
+def delete(request, id):
+    try:
+        article = article_by_id(id)
+        if not article:
+            return output_response(success=RESPONSE_FAILED, data=None, message=OBJECTS_NOT_FOUND, error=None, status_code=400)
+        
+        legacy = article.values().first()
+        
+        with transaction.atomic():
+            article.delete()
+
+            remove_object(legacy.get('banner'))
+            remove_object(legacy.get('thumbnail'))
+        
+        return output_response(success=RESPONSE_SUCCESS, data={'id': id}, message=None, error=None, status_code=200)
+    except Exception as e:
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        error_message = "{}:{}".format(filename, line_number)
+        return output_response(success=RESPONSE_ERROR, data=None, message=error_message, error=str(e), status_code=500)
+    
 @api_view(['GET'])
 @authentication_classes([CustomBasicAuthentication])
 def read_list(request):

@@ -63,6 +63,7 @@ urlpatterns = [
     # Article
     path("{}/{}/article/create".format(api, version), article_controller.create),
     path("{}/{}/article/update/<id>".format(api, version), article_controller.update),
+    path("{}/{}/article/delete/<id>".format(api, version), article_controller.delete),
     path("{}/{}/article/list".format(api, version), article_controller.read_list),
     path("{}/{}/article/<id>".format(api, version), article_controller.read_by_id),
 
