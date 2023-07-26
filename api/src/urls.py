@@ -44,6 +44,7 @@ urlpatterns = [
     path("{}/{}/users/register/google".format(api, version), user_controller.google_register),
     path("{}/{}/users/login/google".format(api, version), user_controller.google_login),
     path("{}/{}/users/delete".format(api, version), user_controller.delete),
+    path("{}/{}/users/get-list".format(api, version), user_controller.get_list_user),
 
     # Dictionary
     path("{}/{}/dictionary/create".format(api, version), dictionary_controller.create),
