@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from celery.schedules import crontab
 import os
 import environ
 
@@ -49,7 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'storages',
-    'django_celery_results',
+    'src.queue'
 ]
 
 MIDDLEWARE = [
@@ -194,8 +195,16 @@ GOOGLE_CLIENT_SECRET=env('GOOGLE_CLIENT_SECRET')
 COMPANY_LOGO=env('COMPANY_LOGO')
 COMPANY_HELPER_MAIL=env('COMPANY_HELPER_MAIL')
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
+CELERY_BROKER_URL = os.getenv('CELERY_URL')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_URL')
+CELERY_TIMEZONE = 'UTC'
+CELERY_ENABLE_UTC = True
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BEAT_SCHEDULE = {
+    "minus": {
+        "task": "src.queue.notification.tasks.minus",
+        "schedule": crontab(minute="*/1"),
+        "args": (16, 15)
+    },
+}
