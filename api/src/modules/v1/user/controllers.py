@@ -2,12 +2,13 @@ from django.db import transaction
 from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework import exceptions
-from rest_framework.decorators import api_view, authentication_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from django.template.loader import render_to_string
 from src.helpers import output_response, generate_registration_url, generate_request_reset_password_url, encrypt, decrypt
 from src.constants import RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_FAILED, USER_ALREADY_EXISTS, USER_DOES_NOT_EXISTS, PASSWORD_DOES_NOT_MATCH, MULTIPLE_ROWS_RETURNED, AUTHENTICATION_FAILED, GENDER_FEMALE, ROLE_USER, USER_VERIFICATION_SUCCESS, CONFIRM_PASSWORD_DOES_NOT_MATCH, PAYLOAD_CANNOT_BE_EMPTY, PASSWORD_CANNOT_BE_THE_SAME_AS_PREVIOUS_PASSWORD, USER_IS_NOT_VERIFIED, USER_IS_VERIFIED, CHANNEL_ID_TOKEN_DOES_NOT_MATCH
 from src.authentications.basic_auth import CustomBasicAuthentication
 from src.authentications.jwt_auth import CustomJWTAuthentication
+from src.permissions.admin_permission import IsAdmin
 from src.mails.services import send_email
 from src.modules.v1.profile.models import Profile
 from src.modules.v1.pregnancy.models import Pregnancy
@@ -16,8 +17,9 @@ from src.modules.v1.interest.models import Interest
 from src.modules.v1.dictionary.queries import dictionary_by_id
 from src.modules.v1.user.queries import user_by_id
 from src.modules.v1.profile.queries import get_latest_profile_id_today, profile_by_code, profile_by_user_id
+from src.paginations.page_number_pagination import CustomPageNumberPagination
 from datetime import datetime
-from .serializers import RegisterSerializer, LoginSerializer, LoginResponseSerializer, UserSerializer, RefreshTokenSerializer, ChangePasswordSerializer, RequestResetPasswordSerializer, ResetPasswordSerializer, CheckVerificationSerializer, GoogleLoginSerializer, GoogleRegisterSerializer
+from .serializers import RegisterSerializer, LoginSerializer, LoginResponseSerializer, UserSerializer, RefreshTokenSerializer, ChangePasswordSerializer, RequestResetPasswordSerializer, ResetPasswordSerializer, CheckVerificationSerializer, GoogleLoginSerializer, GoogleRegisterSerializer, GetListSerializer, UserProfileSerializer
 from .models import User
 from .queries import user_registered, user_registered_not_verified, user_exists, user_by_id, user_exists_verified, user_exists_active, social_user
 from django.shortcuts import render
@@ -217,7 +219,8 @@ def login(request):
         with transaction.atomic():
             user_update = user_by_id(user.get('id'))
             user_update.update(
-                last_login=datetime.now()
+                last_login=datetime.now(),
+                device_id=validated_payload.get('device_id')
             )
 
         return output_response(success=RESPONSE_SUCCESS, data=response_data.validated_data, message=None, error=None, status_code=200)
@@ -282,6 +285,30 @@ def get_user(request):
         serialize_user = UserSerializer(user).data
 
         return output_response(success=RESPONSE_SUCCESS, data=serialize_user, message=None, error=None, status_code=200)
+    except Exception as e:
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        error_message = "{}:{}".format(filename, line_number)
+        return output_response(success=RESPONSE_ERROR, data=None, message=error_message, error=str(e), status_code=500)
+
+@api_view(['GET'])
+@authentication_classes([CustomJWTAuthentication])
+def get_list_user(request):
+    try:
+        payload = GetListSerializer(data=request.query_params)
+        if not payload.is_valid():
+            return output_response(success=RESPONSE_FAILED, data=None, message=None, error=payload.errors, status_code=400)
+        
+        validated_payload = payload.validated_data
+
+        paginator = CustomPageNumberPagination()
+        user = user_registered(validated_payload.get('username'), validated_payload.get('username'), validated_payload.get('username'))
+        user = user.order_by('-created_at')
+        result_page = paginator.paginate_queryset(user, request)
+        serializer = UserProfileSerializer(result_page, many=True)
+
+        return paginator.get_paginated_response(success=RESPONSE_SUCCESS, data=serializer.data, message=None, error=None, status_code=200)
     except Exception as e:
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename
@@ -585,10 +612,30 @@ def google_login(request):
         with transaction.atomic():
             user_update = user_by_id(user.get('id'))
             user_update.update(
-                last_login=datetime.now()
+                last_login=datetime.now(),
+                device_id=validated_payload.get('device_id')
             )
 
         return output_response(success=RESPONSE_SUCCESS, data=response_data.validated_data, message=None, error=None, status_code=200)
+    except Exception as e:
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        filename = exception_traceback.tb_frame.f_code.co_filename
+        line_number = exception_traceback.tb_lineno
+        error_message = "{}:{}".format(filename, line_number)
+        return output_response(success=RESPONSE_ERROR, data=None, message=error_message, error=str(e), status_code=500)
+    
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication])
+@permission_classes([IsAdmin])
+def delete(request):
+    try:
+        user = user_by_id(request.user.get('id'))
+        if not user:
+            return output_response(success=RESPONSE_FAILED, data=None, message=USER_DOES_NOT_EXISTS, error=None, status_code=404)
+        
+        user = user.first().delete()
+
+        return output_response(success=RESPONSE_SUCCESS, data=None, message=None, error=None, status_code=200)
     except Exception as e:
         exception_type, exception_object, exception_traceback = sys.exc_info()
         filename = exception_traceback.tb_frame.f_code.co_filename

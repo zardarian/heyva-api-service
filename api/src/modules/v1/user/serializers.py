@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from src.modules.v1.role.serializers import RoleRelationSerializer
 from src.modules.v1.role.queries import role_by_user_id
+from src.modules.v1.profile.queries import profile_by_user_id
+from src.storages.services import get_object
 from .models import User
 
 class UserSerializer(serializers.ModelSerializer):
@@ -13,6 +15,28 @@ class UserSerializer(serializers.ModelSerializer):
     def get_roles(self, obj):
         roles = role_by_user_id(obj.id)
         return RoleRelationSerializer(roles, many=True).data
+    
+class UserProfileSerializer(serializers.ModelSerializer):
+    profile = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'phone_number', 'is_verified', 'last_login', 'profile', 'avatar']
+
+    def get_profile(self, obj):
+        profile = profile_by_user_id(obj.id)
+        return profile.values('code', 'full_name', 'avatar').first()
+    
+    def get_avatar(self, obj):
+        profile = self.get_profile(obj)
+        if not profile.get('avatar'):
+            return None
+        
+        if 'http' in profile.get('avatar'):
+            return profile.get('avatar')
+        
+        return get_object(profile.get('avatar'), 3600)
     
 class UserRelationSerializer(serializers.ModelSerializer):
 
@@ -36,6 +60,7 @@ class RegisterSerializer(serializers.Serializer):
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
+    device_id = serializers.CharField(required=False)
 
 class RefreshTokenSerializer(serializers.Serializer):
     id = serializers.CharField(required=True)
@@ -89,3 +114,7 @@ class GoogleRegisterSerializer(serializers.Serializer):
 class GoogleLoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     google_id = serializers.CharField(required=True)
+    device_id = serializers.CharField(required=False)
+
+class GetListSerializer(serializers.Serializer):
+    username = serializers.CharField(required=False)

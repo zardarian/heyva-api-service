@@ -43,6 +43,8 @@ urlpatterns = [
     path("{}/{}/users/check-verification".format(api, version), user_controller.check_verification),
     path("{}/{}/users/register/google".format(api, version), user_controller.google_register),
     path("{}/{}/users/login/google".format(api, version), user_controller.google_login),
+    path("{}/{}/users/delete".format(api, version), user_controller.delete),
+    path("{}/{}/users/get-list".format(api, version), user_controller.get_list_user),
 
     # Dictionary
     path("{}/{}/dictionary/create".format(api, version), dictionary_controller.create),
@@ -61,6 +63,8 @@ urlpatterns = [
 
     # Article
     path("{}/{}/article/create".format(api, version), article_controller.create),
+    path("{}/{}/article/update/<id>".format(api, version), article_controller.update),
+    path("{}/{}/article/delete/<id>".format(api, version), article_controller.delete),
     path("{}/{}/article/list".format(api, version), article_controller.read_list),
     path("{}/{}/article/<id>".format(api, version), article_controller.read_by_id),
 

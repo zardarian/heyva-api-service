@@ -66,7 +66,19 @@ class CreateArticleSerializer(serializers.Serializer):
     thumbnail = serializers.FileField(required=False)
     tag = serializers.ListField(required=True)
     attachment = serializers.ListField(required=False, child=serializers.CharField(required=False))
+    app_env = serializers.CharField(required=False)
+
+class UpdateArticleSerializer(serializers.Serializer):
+    title = serializers.CharField(required=False)
+    body = serializers.CharField(required=False)
+    creator = serializers.CharField(required=False)
+    banner = serializers.FileField(required=False)
+    thumbnail = serializers.FileField(required=False)
+    tag = serializers.ListField(required=False)
+    attachment = serializers.ListField(required=False, child=serializers.CharField(required=False))
+    app_env = serializers.CharField(required=False)
 
 class ReadSerializer(serializers.Serializer):
     search = serializers.CharField(required=False)
     tag = serializers.ListField(required=False)
+    app_env = serializers.CharField(required=False)

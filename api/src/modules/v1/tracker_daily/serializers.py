@@ -37,3 +37,4 @@ class InsightSerializer(serializers.Serializer):
 
 class RecommendationSerializer(serializers.Serializer):
     date = serializers.DateField(required=True)
+    app_env = serializers.CharField(required=False)

@@ -51,3 +51,4 @@ class PreviewContentSerializer(serializers.ModelSerializer):
 class ReadListContentSerializer(serializers.Serializer):
     search = serializers.CharField(required=False)
     tag = serializers.ListField(required=False, child=serializers.CharField())
+    app_env = serializers.CharField(required=False)
