@@ -51,8 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'storages',
-    'src.queue'
+    'storages'
 ]
 
 MIDDLEWARE = [
@@ -204,9 +203,9 @@ CELERY_ENABLE_UTC = True
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BEAT_SCHEDULE = {
-    "minus": {
-        "task": "src.queue.notification.tasks.minus",
-        "schedule": crontab(minute="*/1"),
-        "args": (16, 15)
+    "notification_reminder": {
+        "task": "src.queue.notification.tasks.send_notification_program_reminder",
+        "schedule": crontab(minute="*/2"),
+        "args": ()
     },
 }
