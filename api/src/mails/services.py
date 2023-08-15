@@ -6,7 +6,7 @@ def send_email(subject, message, recipient_list, html_message=None):
         send_mail(
             subject,
             message,
-            settings.EMAIL_HOST_USER,
+            settings.EMAIL_SENDER,
             recipient_list,
             fail_silently=False,
             html_message=html_message,
