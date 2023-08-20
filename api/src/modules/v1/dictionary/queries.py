@@ -15,7 +15,7 @@ def dictionary_active_by_type(type, search):
     
     return dictionary
 
-def dictionary_active_by_type_id(type, id, search):
+def dictionary_active_by_type_id(type, id, search, name, exclude_startswith_name):
     dictionary = Dictionary.objects.filter(
         type=type,
         is_active=True,
@@ -25,6 +25,16 @@ def dictionary_active_by_type_id(type, id, search):
     if id:
         dictionary = dictionary.filter(
             id__in = id
+        )
+
+    if name:
+        dictionary = dictionary.filter(
+            name = name
+        )
+
+    if exclude_startswith_name:
+        dictionary = dictionary.filter(
+            ~Q(name__startswith = exclude_startswith_name)
         )
 
     if search:
