@@ -53,7 +53,7 @@ def read_by_type(request):
             return output_response(success=RESPONSE_FAILED, data=None, message=None, error=payload.errors, status_code=400)
         
         validated_payload = payload.validated_data
-        dictionary = dictionary_active_by_type_id(validated_payload.get('type'), validated_payload.get('id'), validated_payload.get('search'), validated_payload.get('name'), validated_payload.get('exclude_startswith_name'))
+        dictionary = dictionary_active_by_type_id(validated_payload.get('type'), validated_payload.get('id'), validated_payload.get('search'), validated_payload.get('name'), validated_payload.get('exclude_onboarding_tags'))
 
         return output_response(success=RESPONSE_SUCCESS, data=DictionarySerializer(dictionary, many=True).data, message=None, error=None, status_code=200)
     except Exception as e:

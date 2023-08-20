@@ -1,5 +1,6 @@
 from django.db.models import Q
 from .models import Dictionary
+from src.constants import EXCLUDED_ONBOARDING_TAG_ID
 
 def dictionary_active_by_type(type, search):
     dictionary = Dictionary.objects.filter(
@@ -15,7 +16,7 @@ def dictionary_active_by_type(type, search):
     
     return dictionary
 
-def dictionary_active_by_type_id(type, id, search, name, exclude_startswith_name):
+def dictionary_active_by_type_id(type, id, search, name, exclude_onboarding_tags):
     dictionary = Dictionary.objects.filter(
         type=type,
         is_active=True,
@@ -32,9 +33,9 @@ def dictionary_active_by_type_id(type, id, search, name, exclude_startswith_name
             name = name
         )
 
-    if exclude_startswith_name:
+    if exclude_onboarding_tags:
         dictionary = dictionary.filter(
-            ~Q(name__startswith = exclude_startswith_name)
+            ~Q(id__in = EXCLUDED_ONBOARDING_TAG_ID)
         )
 
     if search:

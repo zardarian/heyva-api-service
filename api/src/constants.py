@@ -52,3 +52,33 @@ ROLE_USER = '7639eb89-5c76-4028-a9bf-70d0008f714e'
 CONTENT_ARTICLE = '5286b7ad-a921-43a2-958f-a9573553f426'
 CONTENT_VIDEO = '92d3ea7d-5e1b-457e-af30-80c04fcca89e'
 CONTENT_PROGRAM = '1357d3cf-d6be-4fcd-8355-60ff89625513'
+
+EXCLUDED_ONBOARDING_TAG_ID = [
+    'd98af8be-585f-4bcc-82d2-bd547e366e63',
+    '8f69d168-1f3c-4543-8bea-9ad6d809b15c',
+    'cbc95e1c-acd2-4650-b064-5a42513dd0e6',
+    'f1e0b34f-6beb-4bca-aa67-ab290f211d82',
+    '9b7bdec1-53f5-45c9-b6d4-a1ae5178635b',
+    '49d6c40d-fa8b-47c7-b52b-3aa36af62db3',
+    'f768c80f-6208-4e16-a98c-ae287f82f5c6',
+    'e4221044-dea5-4d1b-af94-e64960819fb8',
+    '63c3e375-ed08-430a-91ba-b6d5f567c201',
+    'd960e0ad-c883-4735-9735-132fe28183e4',
+    'c16a4390-4b11-445e-9000-72cd36473e5f',
+    'f9184b03-2bd2-4dbb-baec-8c9629717ac8',
+    '93c5bfc9-ce29-44fa-ad2d-4b8649be7ba9',
+    'e39806a7-242f-4032-ba69-ec31007c113b',
+    'abc6af4e-4394-4e22-baf5-6a70143c1055',
+    '3bf3009f-cc5c-4baf-8e45-44393bba702a',
+    'f5e30255-8c58-4189-81b4-d42a18a0a3e2',
+    '355a2054-4a36-4be0-bd89-8f982c570ef4',
+    'fc1edbd3-2e6c-433a-8b60-271675148207',
+    '42246201-3014-47fb-acb9-9a288ba4da45',
+    'ceec1527-b3af-478e-a78e-dba60904c78b',
+    '64b812e1-7b0b-4f39-b82d-0e31cb71e284',
+    '83e4e460-a004-417c-acfa-f44219f23098',
+    'd7cd01dd-7dc6-46cb-8129-64079ae4e8ca',
+    'd0af9da9-1493-4d40-88c9-6b656a919ffd',
+    '15f8278b-ed6c-4844-97ce-f89c4ee055c7',
+    '48954452-7263-42c9-96f6-f736c99b7927'
+]
