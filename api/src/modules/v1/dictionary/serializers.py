@@ -22,7 +22,7 @@ class ReadByTypeDictionarySerializer(serializers.Serializer):
     id = serializers.ListField(required=False, child=serializers.CharField())
     type = serializers.CharField(required=True)
     search = serializers.CharField(required=False)
-    name = serializers.CharField(required=False)
+    name = serializers.ListField(required=False, child=serializers.CharField())
     exclude_onboarding_tags = serializers.BooleanField(required=False)
 
 class UpdateDictionarySerializer(serializers.Serializer):

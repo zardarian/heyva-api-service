@@ -30,7 +30,7 @@ def dictionary_active_by_type_id(type, id, search, name, exclude_onboarding_tags
 
     if name:
         dictionary = dictionary.filter(
-            name = name
+            name__in = name
         )
 
     if exclude_onboarding_tags:
